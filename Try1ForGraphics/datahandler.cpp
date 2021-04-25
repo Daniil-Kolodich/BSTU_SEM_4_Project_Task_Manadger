@@ -1,8 +1,10 @@
 #include "datahandler.h"
 #include <QDebug>
+#include <cmath>
 DataHandler::DataHandler(){
     SetAmountOfCores ();
-    this->dimensions = amountOfCores + 2;
+    // + 3 cause totalCpu / RAM / Wi-Fi
+    this->dimensions = amountOfCores + 3;
     PrepareData ();
 }
 void DataHandler::SetAmountOfCores (){
@@ -88,6 +90,36 @@ void DataHandler::DataDrawer(QPainter *painter,QRect rect){
     // getting start coordinates & size
     int x_start,y_start,width,height;
     rect.getRect (&x_start,&y_start,&width,&height);
+    /*
+     Выводить график нагрузки на процессор в целом, а на каждое ядро в отдельности сделать небольшой квадрат с отображением
+     .. процента загрузки и градиента в зависимости от процента
+     */
+    int width_of_grid = 0;
+    int height_of_grid = 0;
+    int offset = 0;
+    double x_grid_step;
+    double y_grid_step;
+    if (current_dimension == 1){
+        // drawing each core heat mark
+        width_of_grid = 1;
+        height_of_grid = 2;
+        offset = 5;
+    }
+    else{
+        // drawing background markup
+        width_of_grid = 10;
+        height_of_grid = 10;
+//        offset = 2;
+    }
+
+    // grid drawing
+    x_grid_step = width / (double)width_of_grid;
+    y_grid_step = height / (double)height_of_grid;
+    for (int i = 0 ; i < width_of_grid; i++)
+        for (int j = 0 ;j < height_of_grid; j++){
+               painter->drawRect (QRect(x_start + offset + i * x_grid_step,y_start + offset + j * y_grid_step,x_grid_step - 2*offset,y_grid_step - 2*offset));
+        }
+
     // evaluating step on X axes to cover it by all data
     double x_step = width / (double)(size_of_data - 1);
     QPolygonF poly;
@@ -111,7 +143,7 @@ void DataHandler::DataDrawer(QPainter *painter,QRect rect){
     grad.setFinalStop (x_start,y_start);
     // Adding some colors during the range
     // Experiment with colours & alpha i bag u
-    grad.setColorAt (0,QColor(0,255,0,100));
+    grad.setColorAt (0,QColor(0,255,0,255));
     grad.setColorAt (0.5,QColor(255,255,0,255));
     grad.setColorAt (1,QColor(255,0,0,100));
     // applying LinearGradient to painter
@@ -123,13 +155,14 @@ void DataHandler::DataDrawer(QPainter *painter,QRect rect){
 void DataHandler::SetCurrentDimension(int value){
     // used for switching between cpu / ram / NET graphs
     /*
+    1 - Each Core
     0 - CPU
     -1 - RAM
     -2 - Wi-Fi
     */
     switch (value) {
     case 0:
-        current_dimension = 0;
+        current_dimension = 1;
         break;
     case -1:
         current_dimension = dimensions - 2;
