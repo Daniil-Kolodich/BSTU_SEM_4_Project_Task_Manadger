@@ -28,46 +28,47 @@ DataHandler::~DataHandler(){
 }
 void DataHandler::PrepareData(){
     // setting all data to zero
-    data = new int*[dimensions];
+    data = new float*[dimensions];
     for (int i = 0 ; i < dimensions; i++)
-        data[i] = new int[size_of_data];
+        data[i] = new float[size_of_data];
     for (int j = 0 ; j < dimensions; j++)
         for (int i = 0 ; i < size_of_data; i++)
-            data[j][i] = 0;
+            data[j][i] = i % 2 ? 0 : 100;
 }
-void DataHandler::GetNewData(){
-    /*int newData[2];
-    // calling system to get actual load of CPU & RAM
-    system ("awk -v tmp=\"$(awk \'/cpu /{print $2+$4,$2+$4+$5}\' /proc/stat; sleep 0.3s)\" \'/cpu /{split(tmp,old,\" \"); print 100*($2+$4-old[1])/($2+$4+$5-old[2])}\' /proc/stat > cpu.txt");
-    system ("free | awk \'/Mem: / {print 100 * $3 / $2}\' > ram.txt");
-    // reading data
-    // IDK why it's not working if i try to use only one file
-    FILE* input = fopen("cpu.txt","r");
-    fscanf (input,"%d",&newData[0]);
-    fclose(input);
-    input = fopen("ram.txt","r");
-    fscanf (input,"%d",&newData[1]);
-    fclose(input);*/
+void DataHandler::SecondPartOfGettingData (){
+    system ("bash secondPart.sh");
+    FILE* file = fopen("data.txt","r");
+    int size = 4 * (amountOfCores + 1) + 2;
+    double newData[size];
+    for (int i = 0 ; i < size; i++)
+        fscanf(file,"%lf",&newData[i]);
+    fclose(file);
+    float res[dimensions];
+    for (int i = 0 ; i < amountOfCores + 1; i++){
+        res[i] = (newData[i * 2] - newData[i * 2 + 2 * amountOfCores + 2]) / (newData[i * 2]  + newData[i * 2 + 1] - newData[i * 2 + 2 * amountOfCores + 2] - newData[i * 2 + 2 * amountOfCores + 3] );
+        res[i] *= 100;
+    }
+    res[dimensions - 1] = newData[size - 1];
+    res[dimensions - 2] = newData[size - 2];
 
-    // moving all data one index left
-    // write new data into last cells
-    system ("sleep 0.5s");
+//    system ("sleep 0.1s");
     for (int j= 0 ; j < dimensions; j++){
         for (int i = 0 ; i < size_of_data -1 ; i++)
             data[j][i] = data[j][i + 1];
-        data[j][size_of_data - 1] = rand() % 100;
-//                = newData[j];
+        data[j][size_of_data - 1] = res[j];
     }
-
+}
+void DataHandler::FirstPartOfGettingData (){
+    system ("bash firstPart.sh");
 }
 void DataHandler::ExpandDataSet(int percent){
     // percent is data from vertical slider
     // evaluating new size
     int needed_size = min_size + 0.01 * percent * (max_size - min_size);
     // making new array & copying data to it
-    int** tmp_data = new int*[dimensions];
+    float** tmp_data = new float*[dimensions];
     for (int j = 0 ; j < dimensions; j++){
-        tmp_data[j] = new int[needed_size];
+        tmp_data[j] = new float[needed_size];
         for (int i = 0 ; i < needed_size; i++)
             tmp_data[j][i] = 0;
         for (int i = 0; i < needed_size; i++){
@@ -101,8 +102,8 @@ void DataHandler::DataDrawer(QPainter *painter,QRect rect){
     double y_grid_step;
     if (current_dimension == 1){
         // drawing each core heat mark
-        width_of_grid = 1;
-        height_of_grid = 2;
+        width_of_grid = 5;
+        height_of_grid = 5;
         offset = 5;
     }
     else{
@@ -117,9 +118,11 @@ void DataHandler::DataDrawer(QPainter *painter,QRect rect){
     y_grid_step = height / (double)height_of_grid;
     for (int i = 0 ; i < width_of_grid; i++)
         for (int j = 0 ;j < height_of_grid; j++){
-               painter->drawRect (QRect(x_start + offset + i * x_grid_step,y_start + offset + j * y_grid_step,x_grid_step - 2*offset,y_grid_step - 2*offset));
+               painter->setBrush (QBrush(QColor(0,0,255,current_dimension == 1 ? 255 : 0)));
+               painter->drawRect (QRectF(x_start + offset + i * x_grid_step,y_start + offset + j * y_grid_step,x_grid_step - 2*offset,y_grid_step - 2*offset));
         }
-
+    if (current_dimension == 1)
+        return;
     // evaluating step on X axes to cover it by all data
     double x_step = width / (double)(size_of_data - 1);
     QPolygonF poly;
@@ -161,8 +164,14 @@ void DataHandler::SetCurrentDimension(int value){
     -2 - Wi-Fi
     */
     switch (value) {
-    case 0:
+    case -10:
+        current_dimension = current_dimension == 1 ? 0 : 1;
+        break;
+    case 1:
         current_dimension = 1;
+        break;
+    case 0:
+        current_dimension = 0;
         break;
     case -1:
         current_dimension = dimensions - 2;

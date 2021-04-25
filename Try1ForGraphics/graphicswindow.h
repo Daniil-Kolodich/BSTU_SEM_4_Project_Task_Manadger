@@ -22,6 +22,10 @@ private slots:
 
     void on_verticalSlider_valueChanged(int value);
 
+    void on_pushButton_3_clicked();
+
+    void on_pushButton_4_clicked();
+
 private:
     Ui::GraphicsWindow *ui;
     PainterWidget* graphicsPainter;
