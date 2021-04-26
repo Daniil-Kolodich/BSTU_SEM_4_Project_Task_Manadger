@@ -2,15 +2,23 @@
 #include "ui_graphicswindow.h"
 #include "painterwidget.h"
 #include <QDebug>
+#include <QResizeEvent>
 GraphicsWindow::GraphicsWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::GraphicsWindow)
 {
     ui->setupUi(this);
-    // making our painterWidget & set drawable area to ui->GraphicsView
     graphicsPainter = new PainterWidget(ui->graphicsView);
-    // setting geometry IDK without this not working at all
-    graphicsPainter->setGeometry (ui->graphicsView->x (),ui->graphicsView->y (),ui->graphicsView->width (),ui->graphicsView->height ());
+
+    // random values, adjust later to some ratio with user screen size
+    ui->graphicsView->setMinimumSize (300,300);
+    ui->graphicsView->setMaximumSize (1500,2000);
+}
+
+void GraphicsWindow::resizeEvent (QResizeEvent *event){
+    Q_UNUSED(event)
+    // setting new area for painting
+    graphicsPainter->setGeometry (0,0,ui->graphicsView->width (),ui->graphicsView->height ());
 }
 
 GraphicsWindow::~GraphicsWindow()
@@ -34,6 +42,9 @@ void GraphicsWindow::on_pushButton_clicked()
         graphicsPainter->dh->SetCurrentDimension (1);
         ui->pushButton->setText (QString("CPU"));
     }
+
+    // for screen update NOW
+    graphicsPainter->update ();
 }
 
 void GraphicsWindow::on_pushButton_2_clicked()
@@ -43,6 +54,9 @@ void GraphicsWindow::on_pushButton_2_clicked()
     ui->verticalSlider->setHidden (false);
     ui->pushButton->setText (QString("CPU"));
     graphicsPainter->dh->SetCurrentDimension (-1);
+
+    // for screen update NOW
+    graphicsPainter->update ();
 }
 
 
@@ -53,16 +67,22 @@ void GraphicsWindow::on_pushButton_3_clicked()
     ui->verticalSlider->setHidden (false);
     ui->pushButton->setText (QString("CPU"));
     graphicsPainter->dh->SetCurrentDimension (-2);
+
+    // for screen update NOW
+    graphicsPainter->update ();
 }
 
 void GraphicsWindow::on_pushButton_4_clicked()
 {
     // setting to switch Mode for CPU drawing
-//    graphicsPainter->dh->SetCurrentDimension (-10);
-//    ui->textBrowser->setHidden (!ui->textBrowser->isHidden ());
+    //    graphicsPainter->dh->SetCurrentDimension (-10);
+    //    ui->textBrowser->setHidden (!ui->textBrowser->isHidden ());
 }
 void GraphicsWindow::on_verticalSlider_valueChanged(int value)
 {
     // changing range of data
     graphicsPainter->dh->ExpandDataSet (value);
+
+    // for screen update NOW
+    graphicsPainter->update ();
 }

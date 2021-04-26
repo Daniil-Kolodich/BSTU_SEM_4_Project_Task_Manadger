@@ -18,7 +18,7 @@ protected:
 public slots:
     void UpdateData();
 private:
-    int timer_interval = 1000;
+    int timer_interval = 1500;
     QTimer* timer;
 };
 #endif // PAINTERWIDGET_H

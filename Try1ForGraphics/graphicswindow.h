@@ -15,6 +15,9 @@ public:
     GraphicsWindow(QWidget *parent = nullptr);
     ~GraphicsWindow();
 
+
+    void resizeEvent (QResizeEvent* event);
+
 private slots:
     void on_pushButton_clicked();
 

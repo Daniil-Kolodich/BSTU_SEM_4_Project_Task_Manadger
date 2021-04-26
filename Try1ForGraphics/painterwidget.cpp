@@ -9,19 +9,37 @@
 #include <QDebug>
 PainterWidget::PainterWidget(QWidget *parent) : QWidget(parent)
 {
-    // perhaps i should try send amount of cores + 2 for second param
-    // & actually should i be able to set this fuckind data, dont think so
     dh = new DataHandler();
     timer = new QTimer();
+    // connecting timer::timeout to updatingData
     connect(timer,SIGNAL(timeout()),this,SLOT(UpdateData()));
+
+    // preset for updating data
+    dh->FirstPartOfGettingData ();
+    timer->setInterval (timer_interval);
+    timer->start ();
 }
+
+
 void PainterWidget::UpdateData (){
+    /*
+    once this started
+    it will recall itself until end
+    kinda usefull cause
+    that's gimme separate drawing & updating data
+    */
     dh->SecondPartOfGettingData ();
     update ();
+    // preset
+    dh->FirstPartOfGettingData ();
+    // timer
+    timer->setInterval (timer_interval);
+    timer->start ();
 }
 void PainterWidget::paintEvent (QPaintEvent *event){
     Q_UNUSED(event);
     QPainter painter(this);
+    // found somewhere, look better
     painter.setRenderHint (QPainter::Antialiasing);
     // IDK seems beauty
     int x_offset = 10;
@@ -30,11 +48,8 @@ void PainterWidget::paintEvent (QPaintEvent *event){
     painter.drawRect (x_offset,y_offset,width () - 2 * x_offset, height () - 2 * y_offset);
     // kinda main part for drawing graphs
     dh->DataDrawer (&painter,QRect(x_offset,y_offset,width () - 2 * x_offset, height () - 2 * y_offset));
-    // get new data
-    dh->FirstPartOfGettingData ();
-    timer->setInterval (timer_interval);
-    timer->start ();
 }
+
 PainterWidget::~PainterWidget()
 {
     delete dh;
