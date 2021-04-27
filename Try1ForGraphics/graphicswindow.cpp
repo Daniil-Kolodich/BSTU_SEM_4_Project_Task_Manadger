@@ -64,10 +64,15 @@ void GraphicsWindow::on_pushButton_2_clicked()
 void GraphicsWindow::on_pushButton_3_clicked()
 {
     // setting to draw Wi-Fi
+    if (ui->pushButton_3->text () == QString("Incom")){
+        graphicsPainter->dh->SetCurrentDimension (-2);
+        ui->pushButton_3->setText (QString("Outcom"));
+    }
+    else {
+        graphicsPainter->dh->SetCurrentDimension (-3);
+        ui->pushButton_3->setText (QString("Incom"));
+    }
 
-    ui->verticalSlider->setEnabled (true);
-    ui->pushButton->setText (QString("CPU"));
-    graphicsPainter->dh->SetCurrentDimension (-2);
 
     // for screen update NOW
     graphicsPainter->update ();

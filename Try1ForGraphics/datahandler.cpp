@@ -5,8 +5,8 @@ DataHandler::DataHandler(){
     // ez
     SetAmountOfCores ();
     size_of_data = min_size;
-    // + 3 cause totalCpu / RAM / Wi-Fi
-    this->dimensions = amountOfCores + 3;
+    // + 3 cause totalCpu / RAM / (Wi-Fi * 2)
+    this->dimensions = amountOfCores + 4;
     SetOptimalSizeForTable ();
     PrepareData ();
 }
@@ -39,18 +39,13 @@ void DataHandler::PrepareData(){
             data[j][i] = 0;
 }
 
-void DataHandler::FirstPartOfGettingData (){
+void DataHandler::UpdateData (){
     // look at bash script
-    system ("bash firstPart.sh");
-}
-
-void DataHandler::SecondPartOfGettingData (){
-    // look at bash script
-    system ("bash secondPart.sh");
+    system ("bash script0.sh");
     // reading data from file
     FILE* file = fopen("data.txt","r");
     // cause we like have (old + new) * (amount of cores + 1) * ([1] + [2]) &&&&&& + 2 for RAM & Net
-    int size = 4 * (amountOfCores + 1) + 2;
+    int size = 4 * (amountOfCores + 1) + 3;
     long int newData[size];
     // reading data
     for (int i = 0 ; i < size; i++)
@@ -60,21 +55,23 @@ void DataHandler::SecondPartOfGettingData (){
     float res[dimensions];
     for (int i = 0 ; i < amountOfCores + 1; i++){
         long int delta[] = {
-            newData[i * 2] - newData[i * 2 + 2 * amountOfCores + 2],
-            newData[i * 2]  + newData[i * 2 + 1] - newData[i * 2 + 2 * amountOfCores + 2] - newData[i * 2 + 2 * amountOfCores + 3]
+            newData[i * 2] - newData[i * 2 + 2 * amountOfCores + 4],
+            newData[i * 2]  + newData[i * 2 + 1] - newData[i * 2 + 2 * amountOfCores + 4] - newData[i * 2 + 2 * amountOfCores + 5]
         };
         res[i] = (float)((double)delta[0] / (double)delta[1]);
         res[i] *= 100;
     }
     // set Ram & net
-    res[dimensions - 1] = newData[size - 1];
-    res[dimensions - 2] = newData[size - 2];
+    res[dimensions - 1] = newData[size - 2*(amountOfCores+1)-2]; // out Net
+    res[dimensions - 2] = newData[size - 2*(amountOfCores+1)-3]; // in Net
+    res[dimensions - 3] = newData[size - 1]; // ram
     // move array one cell to left & set right most equal new data
     for (int j= 0 ; j < dimensions; j++){
         for (int i = 0; i < max_size -1 ; i++)
             data[j][i] = data[j][i + 1];
         data[j][max_size - 1]= res[j];
     }
+    qDebug() << "READ : " << res[4] << " , " << res[5];
 }
 
 void DataHandler::ExpandDataSet(int percent){
@@ -156,12 +153,25 @@ void DataHandler::SetOptimalSizeForTable(){
             }
 }
 
-void DataHandler::GraphDrawer(QPainter *painter){
-    // oh Fuck it's graph drawer
-    // ez
-
+void DataHandler::GraphDrawer(QPainter *painter,bool _isOutOfSize){
     int x_start,y_start,width,height;
     rect.getRect (&x_start,&y_start,&width,&height);
+
+
+    double coef = 0.01;
+    while (_isOutOfSize){
+        float max_value = -1;
+        for (int i = 0; i < size_of_data; i++)
+            if (data[current_dimension][i + max_size - size_of_data] > max_value)
+                max_value = data[current_dimension][i + max_size - size_of_data];
+        if (max_value == 0)
+            break;
+        coef = 1 / (max_value * 1.5);
+        qDebug() << coef << " FOR " << max_value;
+        break;
+    }
+
+
 
     double x_step =width / (double)(size_of_data - 1);
     QPolygonF poly;
@@ -170,7 +180,7 @@ void DataHandler::GraphDrawer(QPainter *painter){
     poly.append (QPoint(x_start,y_start + height));
     for (int i = 0 ; i < size_of_data; i++){
         x = i * x_step + x_start;
-        y = height - (data[current_dimension][i + max_size - size_of_data] * height * 0.01 - y_start);
+        y = height - (data[current_dimension][i + max_size - size_of_data] * height * coef - y_start);
         poly.append (QPointF(x,y));
     }
     // end_point
@@ -196,7 +206,7 @@ void DataHandler::DataDrawer(QPainter *painter,QRect rect){
     else
         DrawBackgroundMarkup (painter,width_of_grid,height_of_grid);
     SetCpuGradient (painter,QPointF(x_start,y_start + height),QPointF(x_start,y_start));
-    GraphDrawer (painter);
+    GraphDrawer (painter, current_dimension >= dimensions - 2);
 }
 
 void DataHandler::SetCurrentDimension(int value){
@@ -208,19 +218,24 @@ void DataHandler::SetCurrentDimension(int value){
     -2 - Wi-Fi
     */
     switch (value) {
-    case -10:
-        current_dimension = current_dimension == 1 ? 0 : 1;
-        break;
     case 1:
+        // cores mode
         current_dimension = 1;
         break;
     case 0:
+        // cpu
         current_dimension = 0;
         break;
     case -1:
-        current_dimension = dimensions - 2;
+        // ram
+        current_dimension = dimensions - 3;
         break;
     case -2:
+        // in wifi
+        current_dimension = dimensions - 2;
+        break;
+    case -3:
+        // out wifi
         current_dimension = dimensions - 1;
         break;
     default:

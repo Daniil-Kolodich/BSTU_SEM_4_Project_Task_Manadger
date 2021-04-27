@@ -13,8 +13,7 @@ protected:
     int current_dimension = 0;
     int cpu_grid_sizes[2] {4,4};
     QRect rect;
-public slots:
-    void SecondPartOfGettingData ();
+
 public:
 //    void SetSizes(int width,int height);
 
@@ -26,12 +25,12 @@ public:
     void DrawBackgroundMarkup(QPainter *painter,int _columns,int _rows);
     void SetCpuGradient(QPainter *painter,QPointF _start,QPointF _end);
     void SetOptimalSizeForTable();
-    void GraphDrawer(QPainter *painter);
+    void GraphDrawer(QPainter *painter, bool _isOutOfSize = false);
 
     // ~~ done ~~
     void SetCurrentDimension(int value);
     void PrepareData();
-    void FirstPartOfGettingData();
+    void UpdateData();
     void DataDrawer(QPainter *painter,QRect rect);
     void ExpandDataSet(int percent);
     void SetAmountOfCores();
