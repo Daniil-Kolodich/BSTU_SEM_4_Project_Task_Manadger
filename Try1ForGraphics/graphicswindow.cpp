@@ -35,10 +35,11 @@ void GraphicsWindow::on_pushButton_clicked()
     if (ui->pushButton->text () == QString("CPU")){
         graphicsPainter->dh->SetCurrentDimension (0);
         ui->pushButton->setText (QString("CoreMode"));
-        ui->verticalSlider->setHidden (false);
+
+        ui->verticalSlider->setEnabled (true);
     }
     else {
-        ui->verticalSlider->setHidden (true);
+        ui->verticalSlider->setEnabled (false);
         graphicsPainter->dh->SetCurrentDimension (1);
         ui->pushButton->setText (QString("CPU"));
     }
@@ -51,7 +52,7 @@ void GraphicsWindow::on_pushButton_2_clicked()
 {
     // setting to draw RAM
 
-    ui->verticalSlider->setHidden (false);
+    ui->verticalSlider->setEnabled (true);
     ui->pushButton->setText (QString("CPU"));
     graphicsPainter->dh->SetCurrentDimension (-1);
 
@@ -64,7 +65,7 @@ void GraphicsWindow::on_pushButton_3_clicked()
 {
     // setting to draw Wi-Fi
 
-    ui->verticalSlider->setHidden (false);
+    ui->verticalSlider->setEnabled (true);
     ui->pushButton->setText (QString("CPU"));
     graphicsPainter->dh->SetCurrentDimension (-2);
 

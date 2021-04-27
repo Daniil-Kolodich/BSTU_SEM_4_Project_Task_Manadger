@@ -11,7 +11,8 @@ protected:
     int dimensions = 3;
     int amountOfCores = 0;
     int current_dimension = 0;
-//    int tmp_size[2];
+    int cpu_grid_sizes[2] {4,4};
+    QRect rect;
 public slots:
     void SecondPartOfGettingData ();
 public:
@@ -21,12 +22,11 @@ public:
     DataHandler();
     ~DataHandler();
     // todo
-    void DrawBackgroundMarkup(QPainter *painter,int _x_start,int _y_start,int _width,int _height,int _columns,int _rows, int _offset, bool _is_CPU_Cores = false);
+    void DrawCPUCoresInfo(QPainter *painter);
+    void DrawBackgroundMarkup(QPainter *painter,int _columns,int _rows);
     void SetCpuGradient(QPainter *painter,QPointF _start,QPointF _end);
-    void SetOptimalSizeForTable(int *_width,int *_height, int *_offset);
-    void GraphDrawer(QPainter *painter, int _x_start,int _y_start,int _width, int _heightf);
-//    void SetRamGradient(QPainter *painter,QPointF _start,QPointF _end);
-//    void SetNetGradient(QPainter *painter,QPointF _start,QPointF _end);
+    void SetOptimalSizeForTable();
+    void GraphDrawer(QPainter *painter);
 
     // ~~ done ~~
     void SetCurrentDimension(int value);
@@ -35,8 +35,8 @@ public:
     void DataDrawer(QPainter *painter,QRect rect);
     void ExpandDataSet(int percent);
     void SetAmountOfCores();
-    void SetPainterForCPUGraph(QPainter *painter);
-    void SetPainterForRAMGraph(QPainter *painter);
+//    void SetPainterForCPUGraph(QPainter *painter);
+//    void SetPainterForRAMGraph(QPainter *painter);
 };
 
 #endif // DATAHANDLER_H
