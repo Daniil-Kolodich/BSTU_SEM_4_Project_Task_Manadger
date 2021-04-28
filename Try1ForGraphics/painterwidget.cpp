@@ -15,6 +15,7 @@ PainterWidget::PainterWidget(QWidget *parent) : QWidget(parent)
     connect(timer,SIGNAL(timeout()),this,SLOT(UpdateData()));
 
     // preset for updating data
+    dh->FirstPartOfDataUpdate ();
     timer->setInterval (timer_interval);
     timer->start ();
 }
@@ -27,10 +28,12 @@ void PainterWidget::UpdateData (){
     kinda usefull cause
     that's gimme separate drawing & updating data
     */
+    dh->SecondPartOfDataUpdate ();
     dh->UpdateData ();
     update ();
     // preset
     // timer
+    dh->FirstPartOfDataUpdate ();
     timer->setInterval (timer_interval);
     timer->start ();
 }

@@ -39,19 +39,21 @@ void DataHandler::PrepareData(){
             data[j][i] = 0;
 }
 
+void DataHandler::FirstPartOfDataUpdate(){
+    system("bash firstPart.sh");
+}
+
+void DataHandler::SecondPartOfDataUpdate(){
+    system("bash secondPart.sh");
+}
+
 void DataHandler::UpdateData (){
-    // look at bash script
-    system ("bash script0.sh");
-    // reading data from file
     FILE* file = fopen("data.txt","r");
-    // cause we like have (old + new) * (amount of cores + 1) * ([1] + [2]) &&&&&& + 2 for RAM & Net
-    int size = 4 * (amountOfCores + 1) + 3;
+    int size = 4 * (amountOfCores + 1) + 5;
     long int newData[size];
-    // reading data
     for (int i = 0 ; i < size; i++)
         fscanf(file,"%ld",&newData[i]);
     fclose(file);
-    // some king of data calculations to get actual CPU loads
     float res[dimensions];
     for (int i = 0 ; i < amountOfCores + 1; i++){
         long int delta[] = {
@@ -61,17 +63,18 @@ void DataHandler::UpdateData (){
         res[i] = (float)((double)delta[0] / (double)delta[1]);
         res[i] *= 100;
     }
-    // set Ram & net
-    res[dimensions - 1] = newData[size - 2*(amountOfCores+1)-2]; // out Net
-    res[dimensions - 2] = newData[size - 2*(amountOfCores+1)-3]; // in Net
+    res[dimensions - 1] = (newData[size - 2] - newData[size - 2 -  2 * amountOfCores - 4]) / 1000; // out Net
+    res[dimensions - 2] = (newData[size - 3] - newData[size - 3 -  2 * amountOfCores - 4]) / 1000; // in Net
     res[dimensions - 3] = newData[size - 1]; // ram
-    // move array one cell to left & set right most equal new data
     for (int j= 0 ; j < dimensions; j++){
         for (int i = 0; i < max_size -1 ; i++)
             data[j][i] = data[j][i + 1];
         data[j][max_size - 1]= res[j];
     }
-    qDebug() << "READ : " << res[4] << " , " << res[5];
+
+
+    //    qDebug() << "0 : " << newData[0];
+    //    << " , 1 : "<< data[2][max_size-1];
 }
 
 void DataHandler::ExpandDataSet(int percent){
@@ -145,12 +148,12 @@ void DataHandler::SetCpuGradient(QPainter *painter,QPointF _start,QPointF _end){
 }
 
 void DataHandler::SetOptimalSizeForTable(){
-        for (int i = 1; i <= amountOfCores; i++)
-            if (i >= amountOfCores / i){
-                cpu_grid_sizes[0] = i;
-                cpu_grid_sizes[1] = amountOfCores / i + (i * (amountOfCores / i) == amountOfCores ? 0 : 1);
-                return;
-            }
+    for (int i = 1; i <= amountOfCores; i++)
+        if (i >= amountOfCores / i){
+            cpu_grid_sizes[0] = i;
+            cpu_grid_sizes[1] = amountOfCores / i + (i * (amountOfCores / i) == amountOfCores ? 0 : 1);
+            return;
+        }
 }
 
 void DataHandler::GraphDrawer(QPainter *painter,bool _isOutOfSize){

@@ -26,7 +26,8 @@ public:
     void SetCpuGradient(QPainter *painter,QPointF _start,QPointF _end);
     void SetOptimalSizeForTable();
     void GraphDrawer(QPainter *painter, bool _isOutOfSize = false);
-
+    void FirstPartOfDataUpdate();
+    void SecondPartOfDataUpdate();
     // ~~ done ~~
     void SetCurrentDimension(int value);
     void PrepareData();
