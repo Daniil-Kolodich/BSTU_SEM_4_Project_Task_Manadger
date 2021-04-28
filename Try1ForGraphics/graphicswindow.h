@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "painterwidget.h"
+#include "enumForData.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class GraphicsWindow; }
 QT_END_NAMESPACE

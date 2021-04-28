@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "datahandler.h"
 #include <QTimer>
+#include "enumForData.h"
 class PainterWidget : public QWidget
 {
     Q_OBJECT

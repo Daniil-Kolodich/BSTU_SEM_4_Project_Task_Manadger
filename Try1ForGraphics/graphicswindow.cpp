@@ -31,16 +31,17 @@ GraphicsWindow::~GraphicsWindow()
 
 void GraphicsWindow::on_pushButton_clicked()
 {
+    ui->pushButton_3->setText (QString("Incom"));
     // setting to draw CPU
     if (ui->pushButton->text () == QString("CPU")){
-        graphicsPainter->dh->SetCurrentDimension (0);
+        graphicsPainter->dh->SetCurrentDimension (CPU);
         ui->pushButton->setText (QString("CoreMode"));
 
         ui->verticalSlider->setEnabled (true);
     }
     else {
         ui->verticalSlider->setEnabled (false);
-        graphicsPainter->dh->SetCurrentDimension (1);
+        graphicsPainter->dh->SetCurrentDimension (Cores);
         ui->pushButton->setText (QString("CPU"));
     }
 
@@ -54,7 +55,8 @@ void GraphicsWindow::on_pushButton_2_clicked()
 
     ui->verticalSlider->setEnabled (true);
     ui->pushButton->setText (QString("CPU"));
-    graphicsPainter->dh->SetCurrentDimension (-1);
+    ui->pushButton_3->setText (QString("Incom"));
+    graphicsPainter->dh->SetCurrentDimension (RAM);
 
     // for screen update NOW
     graphicsPainter->update ();
@@ -64,12 +66,14 @@ void GraphicsWindow::on_pushButton_2_clicked()
 void GraphicsWindow::on_pushButton_3_clicked()
 {
     // setting to draw Wi-Fi
+    ui->verticalSlider->setEnabled (true);
+    ui->pushButton->setText (QString("CPU"));
     if (ui->pushButton_3->text () == QString("Incom")){
-        graphicsPainter->dh->SetCurrentDimension (-2);
+        graphicsPainter->dh->SetCurrentDimension (InTraffic);
         ui->pushButton_3->setText (QString("Outcom"));
     }
     else {
-        graphicsPainter->dh->SetCurrentDimension (-3);
+        graphicsPainter->dh->SetCurrentDimension (OutTraffic);
         ui->pushButton_3->setText (QString("Incom"));
     }
 

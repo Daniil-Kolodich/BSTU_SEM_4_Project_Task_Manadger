@@ -44,9 +44,9 @@ void PainterWidget::paintEvent (QPaintEvent *event){
     painter.setRenderHint (QPainter::Antialiasing);
     // IDK seems beauty
     int x_offset = 10;
-    int y_offset = 5;
+    int y_offset = 10;
     // just decorations
-    painter.drawRect (x_offset,y_offset,width () - 2 * x_offset, height () - 2 * y_offset);
+    painter.drawRect (0,0,width (), height ());
     // kinda main part for drawing graphs
     dh->DataDrawer (&painter,QRect(x_offset,y_offset,width () - 2 * x_offset, height () - 2 * y_offset));
 }

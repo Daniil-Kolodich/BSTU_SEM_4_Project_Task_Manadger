@@ -23,6 +23,7 @@ SOURCES += \
 
 HEADERS += \
     datahandler.h \
+    enumForData.h \
     graphicswindow.h \
     painterwidget.h
 
