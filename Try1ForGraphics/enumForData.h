@@ -2,11 +2,11 @@
 #define ENUMFORDATA_H
 
 enum ActualDataType{
-    CPU,
-    RAM,
-    InTraffic,
-    OutTraffic,
-    Cores
+    _CPU,
+    _RAM,
+    _IN_TRAFFIC,
+    _OUT_TRAFFIC,
+    _CORES
 };
 
 #endif // ENUMFORDATA_H
