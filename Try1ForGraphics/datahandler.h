@@ -13,7 +13,7 @@ protected:
     int amountOfCores = 0;
     int current_dimension = _CPU;
     int cpu_grid_sizes[2] {4,4};
-    double width_shrinkage = 0.1;
+    double width_shrinkage = 0.2;
     double height_shrinkage = 0;
     QRect rect;
 

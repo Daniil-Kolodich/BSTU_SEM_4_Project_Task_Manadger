@@ -2,6 +2,9 @@
 #include <QDebug>
 #include <cmath>
 #include <QPen>
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
 DataHandler::DataHandler(){
     // ez
     SetAmountOfCores ();
@@ -41,45 +44,29 @@ void DataHandler::PrepareData(){
 }
 
 void DataHandler::FirstPartOfDataUpdate(){
-    system("bash firstPart.sh");
+    system("bash prepareData.sh");
 }
 
 void DataHandler::SecondPartOfDataUpdate(){
-    system("bash secondPart.sh");
+    system("bash 01_05_RAM.sh");
+    system("bash 01_05_NET.sh");
+    system("bash 01_05_CPU.sh");
 }
 
 void DataHandler::UpdateData (){
-    FILE* file = fopen("data.txt","r");
-    int size = 4 * (amountOfCores + 1) + 5;
-    long int newData[size];
-    for (int i = 0 ; i < size; i++)
-        fscanf(file,"%ld",&newData[i]);
-    fclose(file);
-    float res[dimensions];
-    for (int i = 0 ; i < amountOfCores + 1; i++){
-        long int delta[] = {
-            newData[i * 2] - newData[i * 2 + 2 * amountOfCores + 4],
-            newData[i * 2]  + newData[i * 2 + 1] - newData[i * 2 + 2 * amountOfCores + 4] - newData[i * 2 + 2 * amountOfCores + 5]
-        };
-        res[i] = (float)((double)delta[0] / (double)delta[1]);
-        res[i] *= 100;
-    }
-    res[dimensions - 1] = (newData[size - 2] - newData[size - 2 -  2 * amountOfCores - 4]) / 1000; // out Net
-    res[dimensions - 2] = (newData[size - 3] - newData[size - 3 -  2 * amountOfCores - 4]) / 1000; // in Net
-    res[dimensions - 3] = newData[size - 1]; // ram
+    float newData[dimensions];
+    std::ifstream file;
+    file.open ("data.txt");
+    for (int i = 0 ; i < dimensions; i++)
+        file >> newData[i];
+    file.close ();
     for (int j= 0 ; j < dimensions; j++){
         for (int i = 0; i < max_size -1 ; i++)
             data[j][i] = data[j][i + 1];
-        //        data[j][max_size - 1]= res[j];
     }
 
-    data[0][max_size - 1] = res[0];
-    data[1][max_size - 1] = res[dimensions - 3];
-    data[2][max_size - 1] = res[dimensions - 2];
-    data[3][max_size - 1] = res[dimensions - 1];
-    for (int i = 0 ; i < amountOfCores; i++)
-        data[4 + i][max_size - 1] = res[i + 1];
-
+    for (int i = 0 ; i < dimensions; i++)
+        data[i][max_size - 1] = newData[i];
 }
 
 void DataHandler::ExpandDataSet(int percent){
@@ -119,7 +106,7 @@ void DataHandler::DrawCPUCoresInfo(QPainter *painter){
 
 
             QString str;
-            str.setNum (data[core_id][max_size - 1],'p',1);
+            str.setNum (data[core_id][max_size - 1],'p',2);
             QFont font;
             double min_grid_step = x_grid_step > y_grid_step ? y_grid_step : x_grid_step;
             font.setPixelSize (min_grid_step / str.length ());
@@ -229,14 +216,14 @@ int DataHandler::GetMaxValueForGraph(){
 
     if (max_value == 0)
         return 1;
-
     return max_value;
 }
 
 double DataHandler::GetCoefForGraph(){
-    if (current_dimension < _IN_TRAFFIC)
+    if (current_dimension != _IN_TRAFFIC && current_dimension != _OUT_TRAFFIC)
         return 0.01;
 
+//    qDebug() << "max_value";
     double coef = 1 / (1.3 * GetMaxValueForGraph());
     // controls _OUT_TRAFFIC graph & it's stretching
     // bigger value = bigger graph
@@ -257,7 +244,6 @@ void DataHandler::GraphDrawer(QPainter *painter){
     double coef = GetCoefForGraph ();
 
     // here should be switch with presetting of painter values
-
     switch (current_dimension) {
     case _CPU:
         SetCpuPainterForGraph (painter);
@@ -273,7 +259,7 @@ void DataHandler::GraphDrawer(QPainter *painter){
         break;
     }
 
-
+    // drawing graph
     double x_step =width / (double)(size_of_data - 1);
     QPolygonF poly;
     qreal x,y;
@@ -285,7 +271,6 @@ void DataHandler::GraphDrawer(QPainter *painter){
     }
     poly.append (QPointF(x_start + width,y_start + height));
     painter->drawPolygon (poly);
-
 
     // drawing some good stuff :)
     {
@@ -302,15 +287,19 @@ void DataHandler::GraphDrawer(QPainter *painter){
 
     }
 
-
-
     // load rect with set grad & pen
     painter->setPen (QPen(QBrush(QColor(Qt::cyan)),0.1,Qt::SolidLine,Qt::SquareCap,Qt::RoundJoin));
-    SetCpuGradient (
-                painter,
-                QPointF(x_start + width, y_start + height),
-                QPointF(x_start + width, y_start)
-                );
+    QBrush curr_brush = painter->brush ();
+    QColor curr_color = curr_brush.color ();
+    QLinearGradient grad;
+    grad.setStart (x_start + width,y_start + height);
+    grad.setFinalStop (x_start + original_width,y_start);
+                       //+ height - data[current_dimension][max_size - 1] * height * coef);
+    curr_color.setAlpha (0);
+    grad.setColorAt (0,QColor(100,100,100,50));
+    curr_color.setAlpha (255);
+    grad.setColorAt (1,curr_color);
+    painter->setBrush (grad);
     QRectF load_rect;
     load_rect.setBottomLeft (QPointF(x_start + width,y_start + height));
     load_rect.setTopRight(QPointF(x_start + original_width,y_start + height - data[current_dimension][max_size - 1] * height * coef));
@@ -332,7 +321,7 @@ void DataHandler::GraphDrawer(QPainter *painter){
 
     // drawing text with load data
     QString str;
-    str.setNum (data[current_dimension][max_size - 1],'p',0);
+    str.setNum (data[current_dimension][max_size - 1],'p',2);
     QFont font;
     int pixel_size = original_width - width;
     font.setPixelSize (pixel_size / str.length ());
@@ -354,8 +343,8 @@ void DataHandler::DataDrawer(QPainter *painter,QRect rect){
         DrawCPUCoresInfo (painter);
         return;
     }
-    //            else
-    //                DrawBackgroundMarkup (painter,width_of_grid,height_of_grid);
+//                else
+//                    DrawBackgroundMarkup (painter,width_of_grid,height_of_grid);
     //            SetCpuGradient (painter,QPointF(x_start,y_start + height),QPointF(x_start,y_start));
     GraphDrawer (painter);
 }
