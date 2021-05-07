@@ -45,8 +45,7 @@ void PainterWidget::paintEvent (QPaintEvent *event){
     // IDK seems beauty
     int x_offset = 10;
     int y_offset = 10;
-    // just decorations
-    painter.drawRect (0,0,width (), height ());
+    painter.drawRect (QRect(x_offset,y_offset,width () - 2 * x_offset, height () - 2 * y_offset));
     // kinda main part for drawing graphs
     dh->DataDrawer (&painter,QRect(x_offset,y_offset,width () - 2 * x_offset, height () - 2 * y_offset));
 }

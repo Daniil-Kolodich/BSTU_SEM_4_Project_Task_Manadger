@@ -5,25 +5,229 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
-DataHandler::DataHandler(){
-    // ez
-    SetAmountOfCores ();
-    size_of_data = min_size;
-    // + 3 cause totalCpu / RAM / (Wi-Fi * 2)
-    this->dimensions = amountOfCores + 4;
-    SetOptimalSizeForTable ();
-    PrepareData ();
+void DataHandler::Drawer(QPainter* painter,QRectF rect){
+    qreal x_start,y_start,width,height;
+    rect.getRect (&x_start,&y_start,&width,&height);
+
+    float max_value = GetMaxValueForGraph ();
+    double coef = GetCoefForGraph (max_value);
+
+    SetColor(painter);
+
+    float graph_size = 0.8;
+    QRectF graph_rect = QRectF(x_start,y_start,graph_size * width,height);
+    DrawGraph (painter,graph_rect,coef);
+    QRectF load_rect = QRectF(x_start + graph_size * width,y_start,width * (1 - graph_size),height);
+    DrawLoadBar (painter,load_rect,data[current_dimension][max_size - 1] * coef * height);
+    int amount_of_marks = 5;
+    DrawLoadMarkup (painter,load_rect,amount_of_marks);
+    DrawLoadMarkupText (painter,load_rect,amount_of_marks,max_value);
+    float text_size = 0.2;
+    QRectF text_rect = QRectF(x_start + (graph_size - text_size) * width,y_start,text_size * width,height);
+    DrawLoadText (painter,text_rect,coef);
+}
+void DataHandler::DrawGraph(QPainter* painter,QRectF rect,double coef){
+    qreal x_start,y_start,width,height;
+    rect.getRect (&x_start,&y_start,&width,&height);
+
+    double x_step = width / (double)(size_of_data - 1);
+
+    QPolygonF poly;
+    qreal x,y;
+    poly.append (QPointF(x_start,y_start + height));
+    for (int i = 0 ; i < size_of_data; i++){
+        x = i * x_step + x_start;
+        y = y_start + height * (1 - data[current_dimension][i + max_size - size_of_data] * coef);
+        poly.append (QPointF(x,y));
+    }
+    poly.append (QPointF(x_start + width,y_start + height));
+
+    painter->drawPolygon (poly);
+}
+void DataHandler::DrawLoadBar(QPainter* painter,QRectF rect,float load_height){
+    qreal x_start,y_start,width,height;
+    rect.getRect (&x_start,&y_start,&width,&height);
+
+    int start_alpha = 50;
+    int end_alpha = 255;
+
+    QColor curr_color = painter->brush ().color ();
+    QLinearGradient grad;
+    grad.setStart (x_start,y_start + height);
+    grad.setFinalStop (x_start,y_start);
+    curr_color.setAlpha (start_alpha);
+    grad.setColorAt (0,curr_color);
+    curr_color.setAlpha (end_alpha);
+    grad.setColorAt (1,curr_color);
+
+    painter->setBrush (grad);
+    QRectF load_bar_rect = QRectF(x_start,y_start + height - load_height,width,load_height);
+    painter->drawRect (load_bar_rect);
+}
+void DataHandler::DrawLoadMarkup(QPainter *painter,QRectF rect,int amount_of_marks){
+    qreal x_start,y_start,width,height;
+    rect.getRect (&x_start,&y_start,&width,&height);
+
+    QPolygonF poly;
+    float y_step = height / amount_of_marks;
+
+    for (int i = 0; i <= amount_of_marks; i++){
+            poly.append (QPointF(x_start + width * (i % 2 ? 1 : 0),y_start + height - height * i / amount_of_marks));
+            poly.append (QPointF(x_start + width * (i % 2 ? 0 : 1),y_start + height - height * i / amount_of_marks));
+    }
+
+    painter->drawPolyline (poly);
+}
+void DataHandler::DrawLoadMarkupText(QPainter *painter,QRectF rect,int amount_of_marks,float max_value){
+    qreal x_start,y_start,width,height;
+    rect.getRect (&x_start,&y_start,&width,&height);
+
+    float y_step = height / amount_of_marks;
+
+    QPen old_pen = painter->pen ();
+    painter->setPen (QPen(QBrush(QColor(Qt::white)),5,Qt::SolidLine,Qt::SquareCap,Qt::RoundJoin));
+    for (int i =1 ; i <= amount_of_marks;i++){
+        QString mark;
+        mark.setNum ( (float)((float)i / (float)amount_of_marks) * max_value,'p',1);
+        QRectF mark_rect(QPointF(x_start,y_start + height - i * y_step),
+                         QPointF(x_start + width,y_start + height - (i-1) * y_step));
+        QFont mark_font;
+        int pixel_size = width;
+        QString str = "<";
+        str.append (mark);
+        mark_font.setPixelSize (pixel_size / str.length ());
+        painter->setFont (mark_font);
+        painter->drawText (mark_rect,str,QTextOption(Qt::AlignHCenter | Qt::AlignTop));
+    }
+    painter->setPen (old_pen);
+}
+void DataHandler::DrawLoadText(QPainter *painter,QRectF rect, double coef){
+    qreal x_start,y_start,width,height;
+    rect.getRect (&x_start,&y_start,&width,&height);
+
+    bool isUpper = data[current_dimension][max_size - 1] * coef < 0.5;
+    QRectF text_load_rect = QRectF(
+                x_start,
+                y_start + (isUpper ? 0 : height * (1 - data[current_dimension][max_size - 1] * coef)),
+                width,
+                (isUpper ? -1 : 1) * height * data[current_dimension][max_size - 1] * coef + (isUpper ? height : 0)
+                );
+//    painter->drawRect (text_load_rect);
+
+    QTextOption options(Qt::AlignRight | (isUpper ? Qt::AlignBottom : Qt::AlignTop));
+
+    QString str;
+    str.setNum (data[current_dimension][max_size - 1],'p',2);
+    QString add_string;
+    add_string = current_dimension == _CPU ? "%" : (current_dimension < _IN_TRAFFIC ? "\nGB" : "\nKb/s");
+    QFont font;
+    int pixel_size = width;
+    font.setPixelSize (pixel_size / str.length ());
+    str.append (add_string);
+    painter->setFont (font);
+    QPen old_pen = painter->pen ();
+    painter->setPen (QPen(QBrush(QColor(Qt::white)),5,Qt::SolidLine,Qt::SquareCap,Qt::RoundJoin));
+    painter->drawText (text_load_rect,str,options);
+    painter->setPen (old_pen);
 }
 
-void DataHandler::SetAmountOfCores (){
+
+
+
+void DataHandler::DataDrawer(QPainter *painter,QRect rect){
+    // getting sizes
+    this->rect = rect;
+    int x_start,y_start,width,height;
+    this->rect.getRect (&x_start,&y_start,&width,&height);
+
+    // IDK refactor those values
+    int width_of_grid = sqrt(size_of_data);
+    int height_of_grid = 10;
+    // if core mode
+    if (current_dimension == _CORES){
+        DrawCPUCoresInfo (painter);
+        return;
+    }
+    //                else
+    //                    DrawBackgroundMarkup (painter,width_of_grid,height_of_grid);
+    //            SetCpuGradient (painter,QPointF(x_start,y_start + height),QPointF(x_start,y_start));
+        Drawer (painter,rect);
+}
+
+void DataHandler::PresetColors (){
+    colors[_RAM] = QColor(90,255,1);
+    colors[_SWAP] = QColor(255,0,66);
+    colors[_IN_TRAFFIC] = QColor(1,238,255);
+    colors[_OUT_TRAFFIC] = QColor(225,0,254);
+    colors[_CPU] = QColor(255,78,0);
+}
+
+void DataHandler::SetColor(QPainter *painter){
+    QPen pen;
+    int width = 3;
+    int background_alpha = 37;
+    int line_alpha = 255;
+
+    QColor color;
+    color.setAlpha (line_alpha);
+    color = colors[current_dimension];
+
+    pen.setJoinStyle (Qt::RoundJoin);
+    pen.setWidth (width);
+    pen.setColor (color);
+    painter->setPen (pen);
+
+    color.setAlpha (background_alpha);
+    painter->setBrush (QBrush(color));
+}
+float DataHandler::GetMaxValueForGraph(){
+    if (current_dimension == _RAM || current_dimension == _SWAP)
+        return max_memory_values[current_dimension];
+    if (current_dimension == _CPU)
+        return 100;
+    float max_value = -1;
+    for (int i = 0; i < size_of_data; i++)
+        if (data[current_dimension][i + max_size - size_of_data] > max_value)
+            max_value = data[current_dimension][i + max_size - size_of_data];
+
+    if (max_value == 0)
+        return 1;
+    return max_value;
+}
+
+double DataHandler::GetCoefForGraph(float max_value){
+    if (current_dimension == _RAM || current_dimension == _SWAP || current_dimension == _CPU)
+        return 1 / max_value;
+    // controls _OUT_TRAFFIC graph & it's stretching
+    //     bigger value = bigger graph
+    double coef = 1 /  max_value;
+    double coef_limit = 0.1;
+    if (coef > coef_limit)
+        coef = coef_limit;
+    return coef;
+}
+DataHandler::DataHandler(){
+    SetSystemValues ();
+    size_of_data = min_size;
+    // + 3 cause totalCpu / RAM / swap / (Wi-Fi * 2)
+    this->dimensions = amountOfCores + 5;
+    SetOptimalSizeForTable ();
+    PrepareData ();
+    PresetColors ();
+}
+
+void DataHandler::SetSystemValues (){
     // get amount of cores & print to file
-    system("nproc > amountOfCores.txt");
+    system("bash presetting.sh");
     // get data from file
-    FILE* cores = fopen("amountOfCores.txt","r");
-    fscanf(cores,"%d",&this->amountOfCores);
-    fclose(cores);
+    std::ifstream file;
+    file.open ("preset.txt");
+    file >> amountOfCores;
+    for (int i = 0 ; i < 2; i++)
+        file >> max_memory_values[i];
+    file.close ();
     // delete file
-    system ("rm amountOfCores.txt");
+    system ("rm preset.txt");
 }
 
 DataHandler::~DataHandler(){
@@ -48,9 +252,8 @@ void DataHandler::FirstPartOfDataUpdate(){
 }
 
 void DataHandler::SecondPartOfDataUpdate(){
-    system("bash 01_05_RAM.sh");
-    system("bash 01_05_NET.sh");
-    system("bash 01_05_CPU.sh");
+    system("bash 01_05_RAM.sh && bash 01_05_NET.sh && bash 01_05_CPU.sh");
+    //    system("bash 05_05_ClickHouseFormat.sh");
 }
 
 void DataHandler::UpdateData (){
@@ -100,11 +303,9 @@ void DataHandler::DrawCPUCoresInfo(QPainter *painter){
             QRectF current_rect(x_start + offset + j * x_grid_step,y_start + offset + i * y_grid_step,
                                 x_grid_step - 2*offset,y_grid_step - 2*offset);
 
-            int core_id = i * columns + j + 4;
+            int core_id = i * columns + j + dimensions - amountOfCores;
             painter->setBrush (QBrush(QColor(2.55 * data[core_id][max_size-1],255 - 2.55 *data[core_id][max_size-1] ,0, 55 + 2 * data[core_id][max_size-1])));
             painter->drawRect (current_rect);
-
-
             QString str;
             str.setNum (data[core_id][max_size - 1],'p',2);
             QFont font;
@@ -122,43 +323,16 @@ void DataHandler::DrawBackgroundMarkup(QPainter *painter, int _columns,int _rows
     rect.getRect (&x_start,&y_start,&width,&height);
 
     width *= 1 - width_shrinkage;
-    height *= 1 - height_shrinkage;
+    //    height *= 1 - height_shrinkage;
 
 
     double x_grid_step = width / (double)_columns,y_grid_step = height / (double)_rows;
-    // ur problem it's boring part
     for (int i = 0; i < _rows; i++)
         for (int j = 0 ; j < _columns; j++)
             painter->drawRect (QRectF(x_start + j * x_grid_step,y_start + i * y_grid_step,
                                       x_grid_step,y_grid_step));
 }
 
-void DataHandler::SetCpuGradient(QPainter *painter,QPointF _start,QPointF _end){
-    QLinearGradient grad;
-    // set Start & End points
-    grad.setStart (_start);
-    grad.setFinalStop (_end);
-    // Adding some colors during the range
-    // Experiment with colours & alpha i bag u
-    //    grad.setColorAt (0,QColor(0,255,0,100));
-    //    grad.setColorAt (0.25,QColor(255,255,0,100));
-    //    grad.setColorAt (0.75,QColor(255,0,100));
-    //    grad.setColorAt (1,QColor(255,0,255,100));
-    // к о ж з г с ф
-    // rainbow
-    // к ж з с ф
-    int alpha = 255;
-    grad.setColorAt (0,  QColor(255,0,0,alpha));
-    //    grad.setColorAt (0.1,QColor(255,136,0,alpha));
-    grad.setColorAt (0.1,QColor(255,255,0,alpha));
-    grad.setColorAt (0.2,QColor(0,255,0,alpha));
-    //    grad.setColorAt (0.4,QColor(0,255,255,alpha));
-    grad.setColorAt (0.3,QColor(0,0,255,alpha));
-    grad.setColorAt (0.4,QColor(255,0,255,alpha));
-    grad.setColorAt (1,  QColor(0,255,255,alpha));
-    // applying LinearGradient to painter
-    painter->setBrush (grad);
-}
 
 void DataHandler::SetCurrentDimension(int value){
     current_dimension = value;
@@ -171,180 +345,4 @@ void DataHandler::SetOptimalSizeForTable(){
             cpu_grid_sizes[1] = amountOfCores / i + (i * (amountOfCores / i) == amountOfCores ? 0 : 1);
             return;
         }
-}
-
-// add later
-void DataHandler::SetCpuPainterForGraph(QPainter *painter){
-    QPen pen(painter->pen ());
-    pen.setJoinStyle (Qt::RoundJoin);
-    pen.setWidth (2);
-    pen.setColor (QColor(255,0,0,255));
-    painter->setPen (pen);
-    painter->setBrush (QBrush(QColor(255,0,0,50)));
-}
-void DataHandler::SetRamPainterForGraph(QPainter *painter){
-    QPen pen(painter->pen ());
-    pen.setJoinStyle (Qt::RoundJoin);
-    pen.setWidth (2);
-    pen.setColor (QColor(0,255,0,255));
-    painter->setPen (pen);
-    painter->setBrush (QBrush(QColor(0,255,0,50)));
-
-}
-void DataHandler::SetInTrafficPainterForGraph(QPainter *painter){
-    QPen pen(painter->pen ());
-    pen.setJoinStyle (Qt::RoundJoin);
-    pen.setWidth (2);
-    pen.setColor (QColor(0,255,255,255));
-    painter->setPen (pen);
-    painter->setBrush (QBrush(QColor(0,255,255,50)));
-}
-void DataHandler::SetOutTrafficPainterForGraph(QPainter *painter){
-    QPen pen(painter->pen ());
-    pen.setJoinStyle (Qt::RoundJoin);
-    pen.setWidth (2);
-    pen.setColor (QColor(255,0,255,255));
-    painter->setPen (pen);
-    painter->setBrush (QBrush(QColor(255,0,255,50)));
-}
-
-int DataHandler::GetMaxValueForGraph(){
-    int max_value = -1;
-    for (int i = 0; i < size_of_data; i++)
-        if (data[current_dimension][i + max_size - size_of_data] > max_value)
-            max_value = data[current_dimension][i + max_size - size_of_data];
-
-    if (max_value == 0)
-        return 1;
-    return max_value;
-}
-
-double DataHandler::GetCoefForGraph(){
-    if (current_dimension != _IN_TRAFFIC && current_dimension != _OUT_TRAFFIC)
-        return 0.01;
-
-//    qDebug() << "max_value";
-    double coef = 1 / (1.3 * GetMaxValueForGraph());
-    // controls _OUT_TRAFFIC graph & it's stretching
-    // bigger value = bigger graph
-    double coef_limit = 0.1;
-    if (coef > coef_limit)
-        coef = coef_limit;
-    return coef;
-}
-
-void DataHandler::GraphDrawer(QPainter *painter){
-    int x_start,y_start,width,height;
-    rect.getRect (&x_start,&y_start,&width,&height);
-    int original_width = width;
-    int original_height = height;
-    width *= 1 - width_shrinkage;
-    height *= 1- height_shrinkage;
-
-    double coef = GetCoefForGraph ();
-
-    // here should be switch with presetting of painter values
-    switch (current_dimension) {
-    case _CPU:
-        SetCpuPainterForGraph (painter);
-        break;
-    case _RAM:
-        SetRamPainterForGraph (painter);
-        break;
-    case _IN_TRAFFIC:
-        SetInTrafficPainterForGraph (painter);
-        break;
-    case _OUT_TRAFFIC:
-        SetOutTrafficPainterForGraph (painter);
-        break;
-    }
-
-    // drawing graph
-    double x_step =width / (double)(size_of_data - 1);
-    QPolygonF poly;
-    qreal x,y;
-    poly.append (QPointF(x_start,y_start + height));
-    for (int i = 0 ; i < size_of_data; i++){
-        x = i * x_step + x_start;
-        y = height - (data[current_dimension][i + max_size - size_of_data] * height * coef - y_start);
-        poly.append (QPointF(x,y));
-    }
-    poly.append (QPointF(x_start + width,y_start + height));
-    painter->drawPolygon (poly);
-
-    // drawing some good stuff :)
-    {
-        //    painter->setPen (QPen(QBrush(QColor(Qt::cyan)),5,Qt::SolidLine,Qt::SquareCap,Qt::RoundJoin));
-        //    QPointF boundary_points[]{
-        //        QPointF(x_start,y_start),
-        //                QPointF(x_start,y_start + height),
-        //                QPointF(x_start + width,y_start + height),
-        //                QPointF(x_start + width,y_start),
-        //                QPointF(x_start + original_width,y_start),
-        //                QPointF(x_start + original_width,y_start + height)
-        //    };
-        //        painter->drawPolyline (boundary_points,4);
-
-    }
-
-    // load rect with set grad & pen
-    painter->setPen (QPen(QBrush(QColor(Qt::cyan)),0.1,Qt::SolidLine,Qt::SquareCap,Qt::RoundJoin));
-    QBrush curr_brush = painter->brush ();
-    QColor curr_color = curr_brush.color ();
-    QLinearGradient grad;
-    grad.setStart (x_start + width,y_start + height);
-    grad.setFinalStop (x_start + original_width,y_start);
-                       //+ height - data[current_dimension][max_size - 1] * height * coef);
-    curr_color.setAlpha (0);
-    grad.setColorAt (0,QColor(100,100,100,50));
-    curr_color.setAlpha (255);
-    grad.setColorAt (1,curr_color);
-    painter->setBrush (grad);
-    QRectF load_rect;
-    load_rect.setBottomLeft (QPointF(x_start + width,y_start + height));
-    load_rect.setTopRight(QPointF(x_start + original_width,y_start + height - data[current_dimension][max_size - 1] * height * coef));
-    painter->drawRect (load_rect);
-
-    // preset of text rect & alignment
-    QRectF text_load_rect;
-    QTextOption options;
-    if (y_start + height - data[current_dimension][max_size - 1] * height * coef <= y_start + 0.5 * height){
-        text_load_rect.setBottomLeft (QPointF(x_start + width,y_start + height));
-        text_load_rect.setTopRight(QPointF(x_start + original_width,y_start + height - data[current_dimension][max_size - 1] * height * coef));
-        options.setAlignment (Qt::AlignHCenter | Qt::AlignTop);
-    }
-    else{
-        text_load_rect.setBottomLeft (QPointF(x_start + width,y_start + height - data[current_dimension][max_size - 1] * height * coef));
-        text_load_rect.setTopRight(QPointF(x_start + original_width,y_start));
-        options.setAlignment (Qt::AlignBottom | Qt::AlignHCenter);
-    }
-
-    // drawing text with load data
-    QString str;
-    str.setNum (data[current_dimension][max_size - 1],'p',2);
-    QFont font;
-    int pixel_size = original_width - width;
-    font.setPixelSize (pixel_size / str.length ());
-    painter->setFont (font);
-    painter->drawText (text_load_rect,str,options);
-}
-
-void DataHandler::DataDrawer(QPainter *painter,QRect rect){
-    // getting sizes
-    this->rect = rect;
-    int x_start,y_start,width,height;
-    this->rect.getRect (&x_start,&y_start,&width,&height);
-
-    // IDK refactor those values
-    int width_of_grid = sqrt(size_of_data);
-    int height_of_grid = 10;
-    // if core mode
-    if (current_dimension == _CORES){
-        DrawCPUCoresInfo (painter);
-        return;
-    }
-//                else
-//                    DrawBackgroundMarkup (painter,width_of_grid,height_of_grid);
-    //            SetCpuGradient (painter,QPointF(x_start,y_start + height),QPointF(x_start,y_start));
-    GraphDrawer (painter);
 }

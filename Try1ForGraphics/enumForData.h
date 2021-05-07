@@ -3,6 +3,7 @@
 
 enum ActualDataType{
     _RAM,
+    _SWAP,
     _IN_TRAFFIC,
     _OUT_TRAFFIC,
     _CPU,
