@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>731</width>
-    <height>235</height>
+    <height>641</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -42,14 +42,20 @@
         <item>
          <widget class="QPushButton" name="pushButton_3">
           <property name="text">
-           <string>Incom</string>
+           <string>inTraffic</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_4">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="text">
-           <string>Export</string>
+           <string>Info</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -85,8 +91,8 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>1400</width>
-          <height>1400</height>
+          <width>1080</width>
+          <height>1920</height>
          </size>
         </property>
         <property name="layoutDirection">
@@ -106,6 +112,22 @@
         </property>
         <property name="resizeAnchor">
          <enum>QGraphicsView::NoAnchor</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPlainTextEdit" name="plainTextEdit">
+        <property name="minimumSize">
+         <size>
+          <width>400</width>
+          <height>400</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>1080</width>
+          <height>1920</height>
+         </size>
         </property>
        </widget>
       </item>

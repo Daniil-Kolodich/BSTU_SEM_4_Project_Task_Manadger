@@ -1,26 +1,20 @@
-//#ifndef CLICKHOUSEHANDLER_H
-//#define CLICKHOUSEHANDLER_H
+#ifndef CLICKHOUSEHANDLER_H
+#define CLICKHOUSEHANDLER_H
 
-//#include <QtNetwork/QNetworkAccessManager>
-//#include <QtNetwork/QNetworkRequest>
-//#include <QtNetwork/QNetworkReply>
-//#include <QUrl>
-//#include <QTextCodec>
-//#include <QByteArray>
-//#include <QDebug>
-//#include <QObject>
+#include <QtNetwork/QNetworkReply>
 
-//class ClickhouseHandler : public QObject
-//{
-//    Q_OBJECT
-//public:
-//    ClickhouseHandler();
-//    virtual ~ClickhouseHandler();
-//    void InsertData(QString data);
-//    bool CheckIfTableCreated();
-//    void CreateTable();
-//private slots:
-//private:
-//};
+class ClickhouseHandler : public QObject
+{
+    Q_OBJECT
+public:
+    ClickhouseHandler();
+    virtual ~ClickhouseHandler();
+    void InsertData(QString data);
+    void CreateTable();
+private slots:
+    void _ReplyFinished();
+private:
+    QNetworkAccessManager *manager;
+};
 
-//#endif // CLICKHOUSEHANDLER_H
+#endif // CLICKHOUSEHANDLER_H
