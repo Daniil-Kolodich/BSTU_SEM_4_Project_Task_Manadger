@@ -15,6 +15,7 @@
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QMainWindow>
+#include <QtWidgets/QPlainTextEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QStatusBar>
@@ -37,6 +38,7 @@ public:
     QSlider *verticalSlider;
     QVBoxLayout *verticalLayout_2;
     QGraphicsView *graphicsView;
+    QPlainTextEdit *plainTextEdit;
     QStatusBar *statusbar;
 
     void setupUi(QMainWindow *GraphicsWindow)
@@ -110,6 +112,11 @@ public:
 
         verticalLayout_2->addWidget(graphicsView);
 
+        plainTextEdit = new QPlainTextEdit(centralwidget);
+        plainTextEdit->setObjectName(QString::fromUtf8("plainTextEdit"));
+
+        verticalLayout_2->addWidget(plainTextEdit);
+
 
         gridLayout->addLayout(verticalLayout_2, 0, 1, 1, 1);
 
@@ -126,10 +133,10 @@ public:
     void retranslateUi(QMainWindow *GraphicsWindow)
     {
         GraphicsWindow->setWindowTitle(QApplication::translate("GraphicsWindow", "GraphicsWindow", nullptr));
-        pushButton->setText(QApplication::translate("GraphicsWindow", "CoreMode", nullptr));
+        pushButton->setText(QApplication::translate("GraphicsWindow", "Cores", nullptr));
         pushButton_2->setText(QApplication::translate("GraphicsWindow", "RAM", nullptr));
-        pushButton_3->setText(QApplication::translate("GraphicsWindow", "Incom", nullptr));
-        pushButton_4->setText(QApplication::translate("GraphicsWindow", "Export", nullptr));
+        pushButton_3->setText(QApplication::translate("GraphicsWindow", "InTraffic", nullptr));
+        pushButton_4->setText(QApplication::translate("GraphicsWindow", "Info", nullptr));
     } // retranslateUi
 
 };
