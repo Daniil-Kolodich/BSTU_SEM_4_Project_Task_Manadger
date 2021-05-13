@@ -28,7 +28,7 @@
         <item>
          <widget class="QPushButton" name="pushButton">
           <property name="text">
-           <string>CoreMode</string>
+           <string>Cores</string>
           </property>
          </widget>
         </item>
@@ -42,7 +42,7 @@
         <item>
          <widget class="QPushButton" name="pushButton_3">
           <property name="text">
-           <string>inTraffic</string>
+           <string>InTraffic</string>
           </property>
          </widget>
         </item>
@@ -53,9 +53,6 @@
           </property>
           <property name="text">
            <string>Info</string>
-          </property>
-          <property name="flat">
-           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -116,20 +113,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPlainTextEdit" name="plainTextEdit">
-        <property name="minimumSize">
-         <size>
-          <width>400</width>
-          <height>400</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>1080</width>
-          <height>1920</height>
-         </size>
-        </property>
-       </widget>
+       <widget class="QPlainTextEdit" name="plainTextEdit"/>
       </item>
      </layout>
     </item>

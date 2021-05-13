@@ -1,8 +1,8 @@
 #include "datahandler.h"
-
+#include <stdlib.h>
+#include <unistd.h>
 QString DataHandler::GetInfoText (){
-        system("bash getText.sh");
-    //    system("sleep 1");
+    system("bash getText.sh");
     std::ifstream file("info.txt");
     QString res;
     while(1){
@@ -10,7 +10,6 @@ QString DataHandler::GetInfoText (){
         file.getline (str,1000);
         res.append (str);
         res.append ('\n');
-//        qDebug() << str;
         delete str;
         if (file.eof())
             break;
@@ -113,15 +112,15 @@ void DataHandler::DrawLoadMarkupText(QPainter *painter,QRectF rect,int amount_of
 
     float y_step = height / amount_of_marks;
 
+    QString mark;
+    mark.setNum (max_value,'p',1);
+    QFont mark_font;
+    mark_font.setPixelSize (width / mark.length ());
+    painter->setFont (mark_font);
     for (int i =1 ; i <= amount_of_marks;i++){
-        QString mark;
         mark.setNum ( (i / (float)amount_of_marks) * max_value,'p',1);
         QRectF mark_rect(QPointF(x_start,y_start + height - i * y_step),
                          QPointF(x_start + width,y_start + height - (i-1) * y_step));
-        int pixel_size = width;
-        QFont mark_font;
-        mark_font.setPixelSize (pixel_size / mark.length ());
-        painter->setFont (mark_font);
         painter->drawText (mark_rect,mark,QTextOption(Qt::AlignHCenter | Qt::AlignTop));
     }
 }
@@ -263,6 +262,7 @@ void DataHandler::UpdateData (){
     float newData[dimensions];
     std::ifstream file;
     file.open ("data.txt");
+    
     for (int i = 0 ; i < dimensions; i++)
         file >> newData[i];
     file.close ();
@@ -297,7 +297,7 @@ void DataHandler::DrawCPUCoresInfo(QPainter *painter,QRectF rect){
     qreal x_start,y_start,width,height;
     rect.getRect (&x_start,&y_start,&width,&height);
 
-    int offset = 5,columns,rows;
+    int offset = 15,columns,rows;
     if (width > height){
         columns = cpu_grid_sizes[0];
         rows = cpu_grid_sizes[1];
@@ -313,10 +313,12 @@ void DataHandler::DrawCPUCoresInfo(QPainter *painter,QRectF rect){
         for (int j = 0 ; j < columns; j++){
             if (i * columns + j >= amountOfCores)
                 return;
+            int core_id = i * columns + j + dimensions - amountOfCores;
+            QPen pen(QBrush(QColor(2.55 * data[core_id][max_size-1],255 - 2.55 *data[core_id][max_size-1] ,0, 30 + 2 * data[core_id][max_size-1])),offset);
+            painter->setPen (pen);
             QRectF current_rect(x_start + offset + j * x_grid_step,y_start + offset + i * y_grid_step,
                                 x_grid_step - 2*offset,y_grid_step - 2*offset);
 
-            int core_id = i * columns + j + dimensions - amountOfCores;
             painter->setBrush (QBrush(QColor(2.55 * data[core_id][max_size-1],255 - 2.55 *data[core_id][max_size-1] ,0, 55 + 2 * data[core_id][max_size-1])));
             painter->drawRect (current_rect);
             QString str;
@@ -325,6 +327,7 @@ void DataHandler::DrawCPUCoresInfo(QPainter *painter,QRectF rect){
             double min_grid_step = x_grid_step > y_grid_step ? y_grid_step : x_grid_step;
             font.setPixelSize (min_grid_step / str.length ());
             painter->setFont (font);
+            painter->setPen (QColor(Qt::white));
             painter->drawText (current_rect,str,QTextOption(Qt::AlignCenter));
         }
 }

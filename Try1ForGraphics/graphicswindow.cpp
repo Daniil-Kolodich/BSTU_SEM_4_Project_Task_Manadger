@@ -19,7 +19,6 @@ GraphicsWindow::GraphicsWindow(QWidget *parent)
     ui->plainTextEdit->setMinimumSize (screen_size.width () * 0.5,screen_size.height () * 0.5);
     ui->plainTextEdit->setMaximumSize (screen_size.width (),screen_size.height ());
 //    ui->graphicsView->setBaseSize (1500,1000);
-    ui->graphicsView->set
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setIcon (this->style ()->standardIcon (QStyle::SP_ComputerIcon));
     trayIcon->setToolTip ("Task Manager @ Danon");
@@ -60,7 +59,7 @@ void GraphicsWindow::on_pushButton_clicked()
     resizeEvent (nullptr);
     if (ui->pushButton->text () == QString("CPU")){
         graphicsPainter->dh->SetCurrentDimension (_CPU);
-        ui->pushButton->setText (QString("CoreMode"));
+        ui->pushButton->setText (QString("Cores"));
 
         ui->verticalSlider->setEnabled (true);
     }
@@ -106,13 +105,13 @@ void GraphicsWindow::on_pushButton_3_clicked()
     graphicsPainter->isInTray = false;
     resizeEvent (nullptr);
     ui->verticalSlider->setEnabled (true);
-    if (ui->pushButton_3->text () == QString("inTraffic")){
+    if (ui->pushButton_3->text () == QString("InTraffic")){
         graphicsPainter->dh->SetCurrentDimension (_IN_TRAFFIC);
-        ui->pushButton_3->setText (QString("outTraffic"));
+        ui->pushButton_3->setText (QString("OutTraffic"));
     }
     else {
         graphicsPainter->dh->SetCurrentDimension (_OUT_TRAFFIC);
-        ui->pushButton_3->setText (QString("inTraffic"));
+        ui->pushButton_3->setText (QString("InTraffic"));
     }
 
 

@@ -116,8 +116,6 @@ public:
 
         plainTextEdit = new QPlainTextEdit(centralwidget);
         plainTextEdit->setObjectName(QString::fromUtf8("plainTextEdit"));
-        plainTextEdit->setMinimumSize(QSize(400, 400));
-        plainTextEdit->setMaximumSize(QSize(1080, 1920));
 
         verticalLayout_2->addWidget(plainTextEdit);
 
@@ -137,9 +135,9 @@ public:
     void retranslateUi(QMainWindow *GraphicsWindow)
     {
         GraphicsWindow->setWindowTitle(QApplication::translate("GraphicsWindow", "GraphicsWindow", nullptr));
-        pushButton->setText(QApplication::translate("GraphicsWindow", "CoreMode", nullptr));
+        pushButton->setText(QApplication::translate("GraphicsWindow", "Cores", nullptr));
         pushButton_2->setText(QApplication::translate("GraphicsWindow", "RAM", nullptr));
-        pushButton_3->setText(QApplication::translate("GraphicsWindow", "inTraffic", nullptr));
+        pushButton_3->setText(QApplication::translate("GraphicsWindow", "InTraffic", nullptr));
         pushButton_4->setText(QApplication::translate("GraphicsWindow", "Info", nullptr));
     } // retranslateUi
 

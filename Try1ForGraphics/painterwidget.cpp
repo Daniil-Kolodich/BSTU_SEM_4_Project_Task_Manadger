@@ -35,4 +35,3 @@ PainterWidget::~PainterWidget()
 {
     delete dh;
 }
-
