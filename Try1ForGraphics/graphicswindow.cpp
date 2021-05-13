@@ -1,7 +1,7 @@
 #include "graphicswindow.h"
 #include "ui_graphicswindow.h"
 #include "painterwidget.h"
-
+#include <QSignalMapper>
 GraphicsWindow::GraphicsWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::GraphicsWindow)
@@ -11,15 +11,44 @@ GraphicsWindow::GraphicsWindow(QWidget *parent)
 
     this->setWindowTitle ("Task Manager @ Danon");
     QRect screen_size = QApplication::desktop ()->screenGeometry (this);
-//    ui->centralwidget->setMinimumSize (screen_size.width () * 0.7,screen_size.height () * 0.7);
-//    ui->centralwidget->setMaximumSize (screen_size.width (),screen_size.height ());
+
     ui->graphicsView->setMinimumSize (screen_size.width () * 0.5,screen_size.height () * 0.5);
     ui->graphicsView->setMaximumSize (screen_size.width (),screen_size.height ());
+
     ui->plainTextEdit->setHidden (true);
     ui->plainTextEdit->setMinimumSize (screen_size.width () * 0.5,screen_size.height () * 0.5);
     ui->plainTextEdit->setMaximumSize (screen_size.width (),screen_size.height ());
-//    ui->graphicsView->setBaseSize (1500,1000);
-//    ui->graphicsView->set
+
+    SetTraySystem ();
+    SetMenuNavigation ();
+
+}
+
+void GraphicsWindow::SetMenuNavigation (){
+    QMenu *buttonMenu = new QMenu(this);
+    QString action_names[7] {
+        "RAM",
+        "SWAP",
+        "InTraffic",
+        "OutTraffic",
+        "CPU",
+        "Cores",
+        "Info"
+    };
+    for (int i = 0 ; i < 7; i++){
+        QAction *action = new QAction(action_names[i],this);
+        QSignalMapper *mapper = new QSignalMapper();
+        connect(action,SIGNAL(triggered(bool)),mapper,SLOT(map()));
+        mapper->setMapping (action,i);
+        connect (mapper,SIGNAL(mapped(int)),this,SLOT(GraphButtonPressed(int)));
+        buttonMenu->addAction(action);
+    }
+
+    buttonMenu->setTitle (QString("Menu"));
+    ui->menuBar->addMenu (buttonMenu);
+}
+
+void GraphicsWindow::SetTraySystem (){
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setIcon (this->style ()->standardIcon (QStyle::SP_ComputerIcon));
     trayIcon->setToolTip ("Task Manager @ Danon");
@@ -33,7 +62,6 @@ GraphicsWindow::GraphicsWindow(QWidget *parent)
     trayIcon->setContextMenu (menu);
     trayIcon->show ();
     connect (trayIcon,SIGNAL(activated(QSystemTrayIcon::ActivationReason)),this,SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
-
 
 }
 
@@ -49,77 +77,40 @@ GraphicsWindow::~GraphicsWindow()
 }
 
 
-void GraphicsWindow::on_pushButton_clicked()
-{
-    // setting to draw CPU
-
-    ui->pushButton_4->setText ("Info");
-    ui->plainTextEdit->setHidden (true);
-    ui->graphicsView->setHidden (false);
-    graphicsPainter->isInTray = false;
-    resizeEvent (nullptr);
-    if (ui->pushButton->text () == QString("CPU")){
-        graphicsPainter->dh->SetCurrentDimension (_CPU);
-        ui->pushButton->setText (QString("Cores"));
-
-        ui->verticalSlider->setEnabled (true);
+void GraphicsWindow::GraphButtonPressed (int index){
+    if (index == _CORES){
+        CoresButtonPressed ();
+        return;
     }
-    else {
-        ui->verticalSlider->setEnabled (false);
-        graphicsPainter->dh->SetCurrentDimension (_CORES);
-        ui->pushButton->setText (QString("CPU"));
+    else if (index > _CORES){
+        TextButtonPressed ();
+        return;
     }
-
-    // for screen update NOW
-    graphicsPainter->update ();
-}
-
-void GraphicsWindow::on_pushButton_2_clicked()
-{
-    // setting to draw RAM
-
-    ui->pushButton_4->setText ("Info");
-    ui->plainTextEdit->setHidden (true);
-    ui->graphicsView->setHidden (false);
-    graphicsPainter->isInTray = false;
-    resizeEvent (nullptr);
     ui->verticalSlider->setEnabled (true);
-    if (ui->pushButton_2->text () == QString("RAM")){
-        graphicsPainter->dh->SetCurrentDimension (_RAM);
-        ui->pushButton_2->setText (QString("SWAP"));
-    }
-    else {
-        graphicsPainter->dh->SetCurrentDimension (_SWAP);
-        ui->pushButton_2->setText (QString("RAM"));
-    }
-    // for screen update NOW
-    graphicsPainter->update ();
-}
-
-
-void GraphicsWindow::on_pushButton_3_clicked()
-{
-    // setting to draw Wi-Fi
-    ui->pushButton_4->setText ("Info");
     ui->plainTextEdit->setHidden (true);
     ui->graphicsView->setHidden (false);
-    graphicsPainter->isInTray = false;
     resizeEvent (nullptr);
-    ui->verticalSlider->setEnabled (true);
-    if (ui->pushButton_3->text () == QString("InTraffic")){
-        graphicsPainter->dh->SetCurrentDimension (_IN_TRAFFIC);
-        ui->pushButton_3->setText (QString("OutTraffic"));
-    }
-    else {
-        graphicsPainter->dh->SetCurrentDimension (_OUT_TRAFFIC);
-        ui->pushButton_3->setText (QString("InTraffic"));
-    }
-
-
-    // for screen update NOW
-    graphicsPainter->update ();
+    graphicsPainter->isInTray = false;
+    graphicsPainter->dh->SetCurrentDimension (index);
+    update ();
 }
-
+void GraphicsWindow::CoresButtonPressed (){
+    ui->verticalSlider->setEnabled (false);
+    ui->plainTextEdit->setHidden (true);
+    ui->graphicsView->setHidden (false);
+    resizeEvent (nullptr);
+    graphicsPainter->isInTray = false;
+    graphicsPainter->dh->SetCurrentDimension (_CORES);
+    update ();
+}
+void GraphicsWindow::TextButtonPressed (){
+    ui->plainTextEdit->setHidden (false);
+    ui->graphicsView->setHidden (true);
+    ui->verticalSlider->setEnabled (false);
+    graphicsPainter->isInTray = true;
+    resizeEvent (nullptr);
+    update ();
+}
 void GraphicsWindow::iconActivated (QSystemTrayIcon::ActivationReason reason){
    if (reason == QSystemTrayIcon::Trigger){
        if (!this->isVisible ()){
@@ -138,19 +129,7 @@ void GraphicsWindow::closeEvent (QCloseEvent *event){
     Q_UNUSED(event)
     exit(0);
 }
-void GraphicsWindow::on_pushButton_4_clicked()
-{
-    ui->graphicsView->setHidden (true);
-    ui->plainTextEdit->setHidden (false);
-    graphicsPainter->isInTray = true;
-    ui->verticalSlider->setEnabled (false);
-    resizeEvent (nullptr);
-//    ui->plainTextEdit->setPlainText ("LOADING...");
-    ui->plainTextEdit->setPlainText (graphicsPainter->dh->GetInfoText());
-    if (ui->pushButton_4->text () == "Info")
-        ui->pushButton_4->setText ("Refresh");
 
-}
 void GraphicsWindow::on_verticalSlider_valueChanged(int value)
 {
     graphicsPainter->dh->ExpandDataSet (value);

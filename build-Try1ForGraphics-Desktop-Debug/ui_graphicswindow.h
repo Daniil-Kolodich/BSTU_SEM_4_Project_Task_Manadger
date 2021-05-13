@@ -15,8 +15,8 @@
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPlainTextEdit>
-#include <QtWidgets/QPushButton>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QVBoxLayout>
@@ -30,22 +30,18 @@ public:
     QWidget *centralwidget;
     QGridLayout *gridLayout;
     QHBoxLayout *horizontalLayout;
-    QVBoxLayout *verticalLayout;
-    QPushButton *pushButton;
-    QPushButton *pushButton_2;
-    QPushButton *pushButton_3;
-    QPushButton *pushButton_4;
     QSlider *verticalSlider;
     QVBoxLayout *verticalLayout_2;
     QGraphicsView *graphicsView;
     QPlainTextEdit *plainTextEdit;
     QStatusBar *statusbar;
+    QMenuBar *menuBar;
 
     void setupUi(QMainWindow *GraphicsWindow)
     {
         if (GraphicsWindow->objectName().isEmpty())
             GraphicsWindow->setObjectName(QString::fromUtf8("GraphicsWindow"));
-        GraphicsWindow->resize(731, 235);
+        GraphicsWindow->resize(731, 433);
         QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
@@ -57,31 +53,6 @@ public:
         gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
-        verticalLayout = new QVBoxLayout();
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-        pushButton = new QPushButton(centralwidget);
-        pushButton->setObjectName(QString::fromUtf8("pushButton"));
-
-        verticalLayout->addWidget(pushButton);
-
-        pushButton_2 = new QPushButton(centralwidget);
-        pushButton_2->setObjectName(QString::fromUtf8("pushButton_2"));
-
-        verticalLayout->addWidget(pushButton_2);
-
-        pushButton_3 = new QPushButton(centralwidget);
-        pushButton_3->setObjectName(QString::fromUtf8("pushButton_3"));
-
-        verticalLayout->addWidget(pushButton_3);
-
-        pushButton_4 = new QPushButton(centralwidget);
-        pushButton_4->setObjectName(QString::fromUtf8("pushButton_4"));
-
-        verticalLayout->addWidget(pushButton_4);
-
-
-        horizontalLayout->addLayout(verticalLayout);
-
         verticalSlider = new QSlider(centralwidget);
         verticalSlider->setObjectName(QString::fromUtf8("verticalSlider"));
         verticalSlider->setOrientation(Qt::Vertical);
@@ -124,6 +95,10 @@ public:
         statusbar = new QStatusBar(GraphicsWindow);
         statusbar->setObjectName(QString::fromUtf8("statusbar"));
         GraphicsWindow->setStatusBar(statusbar);
+        menuBar = new QMenuBar(GraphicsWindow);
+        menuBar->setObjectName(QString::fromUtf8("menuBar"));
+        menuBar->setGeometry(QRect(0, 0, 731, 23));
+        GraphicsWindow->setMenuBar(menuBar);
 
         retranslateUi(GraphicsWindow);
 
@@ -133,10 +108,6 @@ public:
     void retranslateUi(QMainWindow *GraphicsWindow)
     {
         GraphicsWindow->setWindowTitle(QApplication::translate("GraphicsWindow", "GraphicsWindow", nullptr));
-        pushButton->setText(QApplication::translate("GraphicsWindow", "Cores", nullptr));
-        pushButton_2->setText(QApplication::translate("GraphicsWindow", "RAM", nullptr));
-        pushButton_3->setText(QApplication::translate("GraphicsWindow", "InTraffic", nullptr));
-        pushButton_4->setText(QApplication::translate("GraphicsWindow", "Info", nullptr));
     } // retranslateUi
 
 };
