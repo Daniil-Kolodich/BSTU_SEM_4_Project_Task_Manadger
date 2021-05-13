@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>731</width>
-    <height>235</height>
+    <height>641</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -48,6 +48,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_4">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="text">
            <string>Info</string>
           </property>
@@ -85,8 +88,8 @@
         </property>
         <property name="maximumSize">
          <size>
-          <width>1400</width>
-          <height>1400</height>
+          <width>1080</width>
+          <height>1920</height>
          </size>
         </property>
         <property name="layoutDirection">

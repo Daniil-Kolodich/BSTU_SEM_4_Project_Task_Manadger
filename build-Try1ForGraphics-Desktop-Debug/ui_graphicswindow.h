@@ -45,7 +45,7 @@ public:
     {
         if (GraphicsWindow->objectName().isEmpty())
             GraphicsWindow->setObjectName(QString::fromUtf8("GraphicsWindow"));
-        GraphicsWindow->resize(731, 235);
+        GraphicsWindow->resize(731, 641);
         QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
@@ -76,6 +76,8 @@ public:
 
         pushButton_4 = new QPushButton(centralwidget);
         pushButton_4->setObjectName(QString::fromUtf8("pushButton_4"));
+        pushButton_4->setEnabled(true);
+        pushButton_4->setFlat(false);
 
         verticalLayout->addWidget(pushButton_4);
 
@@ -102,7 +104,7 @@ public:
         sizePolicy1.setHeightForWidth(graphicsView->sizePolicy().hasHeightForWidth());
         graphicsView->setSizePolicy(sizePolicy1);
         graphicsView->setMinimumSize(QSize(600, 100));
-        graphicsView->setMaximumSize(QSize(1400, 1400));
+        graphicsView->setMaximumSize(QSize(1080, 1920));
         graphicsView->setLayoutDirection(Qt::LeftToRight);
         graphicsView->setAutoFillBackground(false);
         graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

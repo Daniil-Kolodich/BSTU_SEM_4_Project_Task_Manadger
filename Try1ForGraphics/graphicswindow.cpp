@@ -19,7 +19,6 @@ GraphicsWindow::GraphicsWindow(QWidget *parent)
     ui->plainTextEdit->setMinimumSize (screen_size.width () * 0.5,screen_size.height () * 0.5);
     ui->plainTextEdit->setMaximumSize (screen_size.width (),screen_size.height ());
 //    ui->graphicsView->setBaseSize (1500,1000);
-//    ui->graphicsView->set
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setIcon (this->style ()->standardIcon (QStyle::SP_ComputerIcon));
     trayIcon->setToolTip ("Task Manager @ Danon");
@@ -145,7 +144,6 @@ void GraphicsWindow::on_pushButton_4_clicked()
     graphicsPainter->isInTray = true;
     ui->verticalSlider->setEnabled (false);
     resizeEvent (nullptr);
-//    ui->plainTextEdit->setPlainText ("LOADING...");
     ui->plainTextEdit->setPlainText (graphicsPainter->dh->GetInfoText());
     if (ui->pushButton_4->text () == "Info")
         ui->pushButton_4->setText ("Refresh");
