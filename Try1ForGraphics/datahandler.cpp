@@ -3,8 +3,6 @@
 #include <unistd.h>
 QString DataHandler::GetInfoText (){
     system("bash getText.sh");
-//    /*
-    
     std::ifstream file("info.txt");
     QString res;
     while(1){
@@ -12,14 +10,11 @@ QString DataHandler::GetInfoText (){
         file.getline (str,1000);
         res.append (str);
         res.append ('\n');
-        //        qDebug() << str;
         delete str;
         if (file.eof())
             break;
     }
     file.close ();
-    qDebug() << res;
-//    */
     return res;
 }
 

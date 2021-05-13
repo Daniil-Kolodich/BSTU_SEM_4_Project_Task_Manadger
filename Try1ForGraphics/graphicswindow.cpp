@@ -129,7 +129,6 @@ void GraphicsWindow::closeEvent (QCloseEvent *event){
     Q_UNUSED(event)
     exit(0);
 }
-
 void GraphicsWindow::on_verticalSlider_valueChanged(int value)
 {
     graphicsPainter->dh->ExpandDataSet (value);
