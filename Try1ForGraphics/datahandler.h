@@ -26,6 +26,8 @@ public:
     void DrawLoadText(QPainter *painter,QRectF rect,double coef);
     void DrawCPUCoresInfo(QPainter *painter,QRectF rect);
 
+
+
     QString GetInfoText();
 
     void SetCurrentDimension(int value);

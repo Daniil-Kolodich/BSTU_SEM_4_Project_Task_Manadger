@@ -25,10 +25,11 @@ void DataHandler::Drawer(QPainter* painter,QRectF rect){
     float max_value = GetMaxValueForGraph ();
     double coef = GetCoefForGraph (max_value);
 
+
     SetColor(painter);
 
 
-    float graph_size = 0.8;
+    float graph_size = 0.85;
     QRectF graph_rect = QRectF(x_start,y_start,graph_size * width,height);
     DrawGraph (painter,graph_rect,coef);
     DrawGraphName (painter,graph_rect);
@@ -164,7 +165,7 @@ void DataHandler::PresetColors (){
 
 void DataHandler::SetColor(QPainter *painter){
     QPen pen;
-    int width = 3;
+    int width = 6;
     int background_alpha = 37;
     int line_alpha = 255;
 
@@ -197,12 +198,12 @@ float DataHandler::GetMaxValueForGraph(){
 }
 
 double DataHandler::GetCoefForGraph(float max_value){
-    if (current_dimension == _RAM || current_dimension == _SWAP || current_dimension == _CPU)
+    if (current_dimension < _IN_TRAFFIC)
         return 1 / max_value;
     // controls _OUT_TRAFFIC graph & it's stretching
     //     bigger value = bigger graph
     double coef = 1 /  max_value;
-    double coef_limit = 0.1;
+    double coef_limit = 0.01;
     if (coef > coef_limit)
         coef = coef_limit;
     return coef;

@@ -12,16 +12,14 @@ GraphicsWindow::GraphicsWindow(QWidget *parent)
     this->setWindowTitle ("Task Manager @ Danon");
     QRect screen_size = QApplication::desktop ()->screenGeometry (this);
 
-    ui->graphicsView->setMinimumSize (screen_size.width () * 0.5,screen_size.height () * 0.5);
+    ui->graphicsView->setMinimumSize (screen_size.width () * 0.4,screen_size.height () * 0.4);
     ui->graphicsView->setMaximumSize (screen_size.width (),screen_size.height ());
 
     ui->plainTextEdit->setHidden (true);
     ui->plainTextEdit->setMinimumSize (screen_size.width () * 0.5,screen_size.height () * 0.5);
     ui->plainTextEdit->setMaximumSize (screen_size.width (),screen_size.height ());
-
     SetTraySystem ();
     SetMenuNavigation ();
-
 }
 
 void GraphicsWindow::SetMenuNavigation (){
@@ -104,12 +102,13 @@ void GraphicsWindow::CoresButtonPressed (){
     update ();
 }
 void GraphicsWindow::TextButtonPressed (){
-    ui->plainTextEdit->setHidden (false);
-    ui->graphicsView->setHidden (true);
     ui->verticalSlider->setEnabled (false);
     graphicsPainter->isInTray = true;
+//    ui->plainTextEdit->setPlainText ("Loading...");
+    ui->graphicsView->setHidden (true);
+    ui->plainTextEdit->setHidden (false);
     resizeEvent (nullptr);
-    update ();
+    ui->plainTextEdit->setPlainText (graphicsPainter->dh->GetInfoText ());
 }
 void GraphicsWindow::iconActivated (QSystemTrayIcon::ActivationReason reason){
    if (reason == QSystemTrayIcon::Trigger){

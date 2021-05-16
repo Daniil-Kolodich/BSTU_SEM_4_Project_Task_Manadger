@@ -41,8 +41,7 @@ public:
     {
         if (GraphicsWindow->objectName().isEmpty())
             GraphicsWindow->setObjectName(QString::fromUtf8("GraphicsWindow"));
-
-        GraphicsWindow->resize(731, 641);
+        GraphicsWindow->resize(299, 456);
         QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
@@ -73,7 +72,7 @@ public:
         sizePolicy1.setVerticalStretch(0);
         sizePolicy1.setHeightForWidth(graphicsView->sizePolicy().hasHeightForWidth());
         graphicsView->setSizePolicy(sizePolicy1);
-        graphicsView->setMinimumSize(QSize(600, 100));
+        graphicsView->setMinimumSize(QSize(30, 30));
         graphicsView->setMaximumSize(QSize(1080, 1920));
         graphicsView->setLayoutDirection(Qt::LeftToRight);
         graphicsView->setAutoFillBackground(false);
@@ -86,6 +85,17 @@ public:
 
         plainTextEdit = new QPlainTextEdit(centralwidget);
         plainTextEdit->setObjectName(QString::fromUtf8("plainTextEdit"));
+        QSizePolicy sizePolicy2(QSizePolicy::Minimum, QSizePolicy::Minimum);
+        sizePolicy2.setHorizontalStretch(30);
+        sizePolicy2.setVerticalStretch(30);
+        sizePolicy2.setHeightForWidth(plainTextEdit->sizePolicy().hasHeightForWidth());
+        plainTextEdit->setSizePolicy(sizePolicy2);
+        plainTextEdit->setMinimumSize(QSize(20, 20));
+        plainTextEdit->setMaximumSize(QSize(1080, 1920));
+        QFont font;
+        font.setPointSize(14);
+        plainTextEdit->setFont(font);
+        plainTextEdit->setInputMethodHints(Qt::ImhMultiLine|Qt::ImhSensitiveData);
 
         verticalLayout_2->addWidget(plainTextEdit);
 
@@ -98,7 +108,7 @@ public:
         GraphicsWindow->setStatusBar(statusbar);
         menuBar = new QMenuBar(GraphicsWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 731, 23));
+        menuBar->setGeometry(QRect(0, 0, 299, 23));
         GraphicsWindow->setMenuBar(menuBar);
 
         retranslateUi(GraphicsWindow);
