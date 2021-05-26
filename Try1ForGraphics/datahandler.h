@@ -48,7 +48,7 @@ private:
     int size_of_data = 10;
     int dimensions = 3;
     int amountOfCores = 0;
-    int current_dimension = _CPU;
+    int current_dimension = _RAM;
     int cpu_grid_sizes[2] {4,4};
     float max_memory_values[2];
     QColor colors[5];

@@ -46,6 +46,7 @@ void DataHandler::Drawer(QPainter* painter,QRectF rect){
     float text_size = 0.3;
     QRectF text_rect = QRectF(x_start + (graph_size - text_size) * width,y_start,text_size * width,height);
     DrawLoadText (painter,text_rect,coef);
+
 }
 
 void DataHandler::DrawGraphName (QPainter *painter, QRectF rect){

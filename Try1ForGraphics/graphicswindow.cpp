@@ -18,6 +18,8 @@ GraphicsWindow::GraphicsWindow(QWidget *parent)
     ui->plainTextEdit->setHidden (true);
     ui->plainTextEdit->setMinimumSize (screen_size.width () * 0.5,screen_size.height () * 0.5);
     ui->plainTextEdit->setMaximumSize (screen_size.width (),screen_size.height ());
+    ui->plainTextEdit->setReadOnly (true);
+
     SetTraySystem ();
     SetMenuNavigation ();
 }
@@ -38,7 +40,7 @@ void GraphicsWindow::SetMenuNavigation (){
         QSignalMapper *mapper = new QSignalMapper();
         connect(action,SIGNAL(triggered(bool)),mapper,SLOT(map()));
         mapper->setMapping (action,i);
-        connect (mapper,SIGNAL(mapped(int)),this,SLOT(GraphButtonPressed(int)));
+        connect (mapper,SIGNAL(mapped(int)),this,SLOT(MenuButtonPressed(int)));
         buttonMenu->addAction(action);
     }
 
@@ -74,8 +76,7 @@ GraphicsWindow::~GraphicsWindow()
     delete ui;
 }
 
-
-void GraphicsWindow::GraphButtonPressed (int index){
+void GraphicsWindow::MenuButtonPressed(int index){
     if (index == _CORES){
         CoresButtonPressed ();
         return;
@@ -84,6 +85,9 @@ void GraphicsWindow::GraphButtonPressed (int index){
         TextButtonPressed ();
         return;
     }
+    GraphButtonPressed (index);
+}
+void GraphicsWindow::GraphButtonPressed (int index){
     ui->verticalSlider->setEnabled (true);
     ui->plainTextEdit->setHidden (true);
     ui->graphicsView->setHidden (false);

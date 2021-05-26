@@ -24,6 +24,7 @@ public:
     void closeEvent (QCloseEvent *event);
 private slots:
 
+    void MenuButtonPressed(int index);
     void GraphButtonPressed (int index);
     void CoresButtonPressed ();
     void TextButtonPressed ();
