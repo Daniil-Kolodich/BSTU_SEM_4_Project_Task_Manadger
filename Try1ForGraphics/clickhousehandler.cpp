@@ -14,7 +14,7 @@ ClickhouseHandler::~ClickhouseHandler(){
 void ClickhouseHandler::InsertData (QString data){
     QByteArray post_data;
     post_data.append (data);
-    QUrl tmp_url("http://localhost:8123/?query=insert into kursach_test2 (* EXCEPT(date)) format TabSeparated");
+    QUrl tmp_url("http://localhost:8123/?query=insert into TaskManagerDB (* EXCEPT(date)) format TabSeparated");
     QNetworkRequest request(tmp_url);
     request.setHeader (QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
     QNetworkReply* reply = manager->post (request,post_data);
@@ -23,7 +23,7 @@ void ClickhouseHandler::InsertData (QString data){
 
 void ClickhouseHandler::CreateTable (){
     QByteArray post_data;
-    QUrl tmp_url("http://localhost:8123/?query=create table if not exists kursach_test2 (date DateTime64(3,'Europe/Moscow') DEFAULT now64(),name String,value Float32) Engine = Memory");
+     QUrl tmp_url("http://localhost:8123/?query=create table if not exists TaskManagerDB (date DateTime64(3) DEFAULT now64(),name String,value Float32) Engine MergeTree() PARTITION by date order by date");
     QNetworkRequest request(tmp_url);
     request.setHeader (QNetworkRequest::ContentTypeHeader,"application/x-www-form-urlencoded");
     QNetworkReply* reply = manager->post (request,post_data);
@@ -33,8 +33,7 @@ void ClickhouseHandler::CreateTable (){
 void ClickhouseHandler::_ReplyFinished(){
     QNetworkReply *reply=qobject_cast<QNetworkReply *>(sender());
     if (reply->error() != QNetworkReply::NoError)
-    {
         exit(1);
-    }
+
     reply->deleteLater();
 }

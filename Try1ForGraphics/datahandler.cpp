@@ -25,9 +25,7 @@ void DataHandler::Drawer(QPainter* painter,QRectF rect){
     float max_value = GetMaxValueForGraph ();
     double coef = GetCoefForGraph (max_value);
 
-
     SetColor(painter);
-
 
     float graph_size = 0.85;
     QRectF graph_rect = QRectF(x_start,y_start,graph_size * width,height);
@@ -153,6 +151,7 @@ void DataHandler::DataDrawer(QPainter *painter,QRectF rect){
         DrawCPUCoresInfo (painter,rect);
         return;
     }
+
     Drawer (painter,rect);
 }
 
@@ -214,7 +213,6 @@ DataHandler::DataHandler(){
     SetSystemValues ();
     size_of_data = min_size;
     db = new ClickhouseHandler();
-    // + 3 cause totalCpu / RAM / swap / (Wi-Fi * 2)
     this->dimensions = amountOfCores + 5;
     SetOptimalSizeForTable ();
     PrepareData ();
@@ -222,31 +220,27 @@ DataHandler::DataHandler(){
 }
 
 void DataHandler::SetSystemValues (){
-    // get amount of cores & print to file
     system("bash presetting.sh");
-    // get data from file
     std::ifstream file;
     file.open ("preset.txt");
     file >> amountOfCores;
     for (int i = 0 ; i < 2; i++)
         file >> max_memory_values[i];
     file.close ();
-    // delete file
     system ("rm preset.txt");
 }
 
 DataHandler::~DataHandler(){
-    // deleting all the data that r used
     for (int j = 0 ; j < dimensions; j++)
         delete[] data[j];
     delete[] data;
 }
 
 void DataHandler::PrepareData(){
-    // setting all data to zero
     data = new float*[dimensions];
     for (int i = 0 ; i < dimensions; i++)
         data[i] = new float[max_size];
+
     for (int j = 0 ; j < dimensions; j++)
         for (int i = 0 ; i < max_size; i++)
             data[j][i] = 0;

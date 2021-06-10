@@ -9,14 +9,14 @@ GraphicsWindow::GraphicsWindow(QWidget *parent)
     ui->setupUi(this);
     graphicsPainter = new PainterWidget(ui->graphicsView);
 
-    this->setWindowTitle ("Task Manager @ Danon");
+    this->setWindowTitle ("Task Manager");
     QRect screen_size = QApplication::desktop ()->screenGeometry (this);
 
-    ui->graphicsView->setMinimumSize (screen_size.width () * 0.4,screen_size.height () * 0.4);
+    ui->graphicsView->setMinimumSize (screen_size.width () * 0.25,screen_size.height () * 0.5);
     ui->graphicsView->setMaximumSize (screen_size.width (),screen_size.height ());
 
     ui->plainTextEdit->setHidden (true);
-    ui->plainTextEdit->setMinimumSize (screen_size.width () * 0.5,screen_size.height () * 0.5);
+    ui->plainTextEdit->setMinimumSize (screen_size.width () * 0.25,screen_size.height () * 0.5);
     ui->plainTextEdit->setMaximumSize (screen_size.width (),screen_size.height ());
     ui->plainTextEdit->setReadOnly (true);
 
@@ -51,7 +51,7 @@ void GraphicsWindow::SetMenuNavigation (){
 void GraphicsWindow::SetTraySystem (){
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setIcon (this->style ()->standardIcon (QStyle::SP_ComputerIcon));
-    trayIcon->setToolTip ("Task Manager @ Danon");
+    trayIcon->setToolTip ("Task Manager");
     QMenu *menu = new QMenu(this);
     QAction *viewAction = new QAction(QString ("Open"),this);
     QAction *quitAction = new QAction(QString ("Exit"),this);
@@ -108,7 +108,6 @@ void GraphicsWindow::CoresButtonPressed (){
 void GraphicsWindow::TextButtonPressed (){
     ui->verticalSlider->setEnabled (false);
     graphicsPainter->isInTray = true;
-//    ui->plainTextEdit->setPlainText ("Loading...");
     ui->graphicsView->setHidden (true);
     ui->plainTextEdit->setHidden (false);
     resizeEvent (nullptr);
