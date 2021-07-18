@@ -1,6 +1,7 @@
 #include "datahandler.h"
 #include <stdlib.h>
 #include <unistd.h>
+
 QString DataHandler::GetInfoText (){
     system("bash getText.sh");
     std::ifstream file("info.txt");
@@ -259,8 +260,20 @@ void DataHandler::UpdateData (){
     std::ifstream file;
     file.open ("data.txt");
     
-    for (int i = 0 ; i < dimensions; i++)
-        file >> newData[i];
+//    for (int i = 0 ; i < dimensions; i++)
+//        file >> newData[i];
+    int i = 0;
+    while(!file.eof()){
+        char tmp[20];
+        file >> tmp;
+        newData[i] = atof(tmp);
+        newData[i] = newData[i] == 0 ? 0.001 : newData[i];
+        i++;
+
+    }
+
+
+
     file.close ();
     for (int j= 0 ; j < dimensions; j++){
         for (int i = 0; i < max_size -1 ; i++)
